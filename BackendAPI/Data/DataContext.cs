@@ -1,0 +1,34 @@
+﻿using BackendAPI.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
+namespace BackendAPI.Data
+{
+    public class DataContext : IdentityDbContext<ApplicationUser>
+    {
+        public DataContext(DbContextOptions options) : base(options) { }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseSqlServer("Server=DESKTOP-DTGB06O\\SQLEXPRESS; Database=Dissertation; Trusted_connection=true; TrustServerCertificate=true");
+
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<IdentityRole>()
+            .HasData(
+                new IdentityRole { Name = "Student", NormalizedName = "student" },
+                new IdentityRole { Name = "Professor", NormalizedName = "Professor" },
+                new IdentityRole { Name = "Outsider", NormalizedName = "Outsider" }
+            );
+        }
+
+
+    }
+
+}
