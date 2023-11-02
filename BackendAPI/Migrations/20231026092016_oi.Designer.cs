@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231021175007_ibit")]
-    partial class ibit
+    [Migration("20231026092016_oi")]
+    partial class oi
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,6 +90,33 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.LoginAttempt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountTimeLogin")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateTimeLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoginAttempts");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -119,19 +146,19 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "82f4b770-e2bc-41fc-9dc1-82963046b1e0",
+                            Id = "64791ee1-c38a-49c8-8a92-c56b2bf901b3",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "7cf72ea5-554f-4e13-8c18-30063163c99f",
+                            Id = "8cf14a8f-b3ed-4939-a577-9ae33ec5b7be",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "30c38daf-b8a0-4af5-b342-3bb8b4bd3348",
+                            Id = "c3845328-f1fa-416b-ad4d-93b414f9affa",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         });

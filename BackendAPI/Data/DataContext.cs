@@ -26,8 +26,10 @@ namespace BackendAPI.Data
                 new IdentityRole { Name = "Professor", NormalizedName = "Professor" },
                 new IdentityRole { Name = "Outsider", NormalizedName = "Outsider" }
             );
+
         }
 
+        public DbSet<LoginAttempt> LoginAttempts { get; set; }
 
     }
 

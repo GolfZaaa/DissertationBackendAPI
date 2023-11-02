@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SendGrid;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 
@@ -29,6 +30,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<DataContext>();
+builder.Services.AddMemoryCache();
 
 #region Start JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -48,6 +50,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 builder.Services.AddScoped<TokenService>();
 #endregion End JWT
+
+
+#region Sendgrid Start
+// เพิ่มการกำหนดค่า SendGridClient
+builder.Services.AddTransient<SendGridClient>(c =>
+{
+    var configuration = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json")
+        .Build();
+
+    return new SendGridClient(configuration.GetSection("SendGrid:SendGridKey").Value);
+});
+
+
+#endregion SendGrid End
 
 #region Identityสร้างเซอร์วิส User,Role (ระวังการเรียงล าดับ)
 builder.Services.AddIdentityCore<ApplicationUser>(opt =>
