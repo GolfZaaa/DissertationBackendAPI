@@ -51,6 +51,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<TokenService>();
 #endregion End JWT
 
+builder.Services.AddScoped<IAccountService, AccountService>();
+
 
 #region Sendgrid Start
 // เพิ่มการกำหนดค่า SendGridClient

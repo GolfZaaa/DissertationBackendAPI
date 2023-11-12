@@ -87,7 +87,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.LoginAttempt", b =>
+            modelBuilder.Entity("BackendAPI.Models.CategoryRoom", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,23 +95,46 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CountTimeLogin")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateTimeLogin")
+                    b.Property<DateTime>("DateTimeCreate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("LoginAttempts");
+                    b.ToTable("CategoryRooms");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.Room", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoomsName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusRooms")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -143,19 +166,19 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "64791ee1-c38a-49c8-8a92-c56b2bf901b3",
+                            Id = "82c42698-2c6a-46a4-9f17-f6ed21f3d2a9",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "8cf14a8f-b3ed-4939-a577-9ae33ec5b7be",
+                            Id = "bb0e32c1-4355-4211-b974-5e905ac65d65",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "c3845328-f1fa-416b-ad4d-93b414f9affa",
+                            Id = "a0f87fa5-dadd-4264-b010-4c046628659e",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         });

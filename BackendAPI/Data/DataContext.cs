@@ -29,7 +29,11 @@ namespace BackendAPI.Data
 
         }
 
-        public DbSet<LoginAttempt> LoginAttempts { get; set; }
+        // ตารางเช็ค Login ผิดเกิน 3 ครั้ง
+        //public DbSet<LoginAttempt> LoginAttempts { get; set; }
+        public DbSet<CategoryRoom> CategoryRooms { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+
 
     }
 

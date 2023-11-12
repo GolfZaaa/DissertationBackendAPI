@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BackendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class oi : Migration
+    public partial class init1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,19 +53,34 @@ namespace BackendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LoginAttempts",
+                name: "CategoryRooms",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateTimeLogin = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CountTimeLogin = table.Column<int>(type: "int", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateTimeCreate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LoginAttempts", x => x.Id);
+                    table.PrimaryKey("PK_CategoryRooms", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoomsName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Capacity = table.Column<int>(type: "int", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StatusRooms = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -179,9 +194,9 @@ namespace BackendAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "64791ee1-c38a-49c8-8a92-c56b2bf901b3", null, "Student", "student" },
-                    { "8cf14a8f-b3ed-4939-a577-9ae33ec5b7be", null, "Professor", "Professor" },
-                    { "c3845328-f1fa-416b-ad4d-93b414f9affa", null, "Outsider", "Outsider" }
+                    { "82c42698-2c6a-46a4-9f17-f6ed21f3d2a9", null, "Student", "student" },
+                    { "a0f87fa5-dadd-4264-b010-4c046628659e", null, "Outsider", "Outsider" },
+                    { "bb0e32c1-4355-4211-b974-5e905ac65d65", null, "Professor", "Professor" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -243,7 +258,10 @@ namespace BackendAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "LoginAttempts");
+                name: "CategoryRooms");
+
+            migrationBuilder.DropTable(
+                name: "Rooms");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
