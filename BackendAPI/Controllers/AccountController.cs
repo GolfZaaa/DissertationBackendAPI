@@ -3,8 +3,8 @@ using BackendAPI.Data;
 using BackendAPI.DTOs;
 using BackendAPI.DTOs.AccountDtos;
 using BackendAPI.Models;
-using BackendAPI.Response;
 using BackendAPI.Services;
+using BackendAPI.Services.IServices;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +22,10 @@ public class AccountController : BaseApiController
     private readonly DataContext _dataContext;
     private readonly IMemoryCache _memoryCache;
     private readonly SendGridClient _sendGridClient;
+    private readonly IAccountServices _accountServices;
 
     public AccountController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, TokenService tokenService, DataContext dataContext,
-         IMemoryCache memoryCache, SendGridClient sendGridClient)
+         IMemoryCache memoryCache, SendGridClient sendGridClient,IAccountServices accountServices)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -32,10 +33,11 @@ public class AccountController : BaseApiController
         _dataContext = dataContext;
         _memoryCache = memoryCache;
         _sendGridClient = sendGridClient;
+        _accountServices = accountServices;
     }
 
 
-    [HttpGet]
+    [HttpGet("ShowUser")]
     public async Task<IActionResult> Get()
     {
         var result = await _userManager.Users.ToListAsync();
@@ -48,11 +50,32 @@ public class AccountController : BaseApiController
         return Ok(users);
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginDto loginDto)
+    [HttpGet("ShowAllUser Service!")]
+    public async Task<ActionResult> ShowAllUser()
+    {
+        return HandleResult(await _accountServices.AllUsers());
+    }
+
+    [HttpPost("AddRole Service!")]
+    public async Task<IActionResult> AddRole(AddRoleUserDto dto)
+    {
+        var validator = new AddRoleValidator();
+        var resultvalidate = validator.Validate(dto);
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.AddRoleAsync(dto));
+    }
+
+
+    [HttpPost("login Service!")]
+    public async Task<IActionResult> Login(LoginDto dto)
     {
         var LoginValidator = new LoginDtoValidator();
-        var LoginValidationResult = LoginValidator.Validate(loginDto);
+        var LoginValidationResult = LoginValidator.Validate(dto);
 
         if (!LoginValidationResult.IsValid)
         {
@@ -60,109 +83,11 @@ public class AccountController : BaseApiController
             return BadRequest(new { Message = "Validation Login Error", Errors = errors });
         }
 
-        var user = await _userManager.FindByNameAsync(loginDto.Username);
-
-        if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
-        {
-            return HandleResult(Result<string>.Failure("Invalid username or password. Please try again."));
-        }
-
-        //เช็ค UserLogin ผิดเกิน 3 ครั้ง
-        //if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
-        //{
-        //    var loginAttempts = _dataContext.LoginAttempts.Where(x => x.UserName == loginDto.Username).ToList();
-
-        //    if (loginAttempts.Count == 0)
-        //    {
-        //        var newLoginAttempt = new LoginAttempt
-        //        {
-        //            UserId = user.Id,
-        //            UserName = loginDto.Username,
-        //            DateTimeLogin = DateTime.Now,
-        //            CountTimeLogin = 1
-        //        };
-        //        user.AccessFailedCount = 1;
-        //        _dataContext.Add(newLoginAttempt);
-        //        _dataContext.SaveChanges();
-
-        //        return HandleResult(Result<string>.Failure("Failed to login. You have 2 more attempts."));
-        //    }
-        //    else if (loginAttempts.Count == 1)
-        //    {
-        //        var newLoginAttempt = new LoginAttempt
-        //        {
-        //            UserId = user.Id,
-        //            UserName = loginDto.Username,
-        //            DateTimeLogin = DateTime.Now,
-        //            CountTimeLogin = 2
-        //        };
-        //        user.AccessFailedCount = 2;
-        //        _dataContext.Add(newLoginAttempt);
-        //        _dataContext.SaveChanges();
-
-        //        return HandleResult(Result<string>.Failure("Failed to login. You have 1 more attempt."));
-        //    }
-        //    else if (loginAttempts.Count == 2)
-        //    {
-        //        var newLoginAttempt = new LoginAttempt
-        //        {
-        //            UserId = user.Id,
-        //            UserName = loginDto.Username,
-        //            DateTimeLogin = DateTime.Now,
-        //            CountTimeLogin = 3
-        //        };
-        //        user.AccessFailedCount = 3;
-        //        _dataContext.Add(newLoginAttempt);
-        //        _dataContext.SaveChanges();
-        //        return HandleResult(Result<string>.Failure("Your account is temporarily blocked. Please login again after 1 day."));
-        //    }
-        //    else if (loginAttempts.Count == 3)
-        //    {
-        //        var test = loginAttempts.Last();
-
-        //        if (DateTime.Now - test.DateTimeLogin >= TimeSpan.FromMinutes(1))
-        //        {
-        //            _dataContext.RemoveRange(loginAttempts);
-        //            _dataContext.SaveChanges();
-
-        //            var newLoginAttempt = new LoginAttempt
-        //            {
-        //                UserId = user.Id,
-        //                UserName = loginDto.Username,
-        //                DateTimeLogin = DateTime.Now,
-        //                CountTimeLogin = 1
-        //            };
-        //            user.AccessFailedCount = 1;
-        //            _dataContext.Add(newLoginAttempt);
-        //            _dataContext.SaveChanges();
-        //            return HandleResult(Result<string>.Failure("Failed to login. You have 1 more attempt."));
-        //        }
-        //        return HandleResult(Result<string>.Failure("Your account is temporarily blocked. Please login again after 5 minute."));
-        //    }
-        //}
-
-        if (!user.EmailConfirmed)
-        {
-            return HandleResult(Result<string>.Failure("Please confirm your email for the first login."));
-        }
-
-        var userId = await _userManager.GetUserIdAsync(user);
-        var userDto = new UserDto
-        {
-            Email = user.Email,
-            Token = await _tokenService.GenerateToken(user),
-            username = loginDto.Username,
-            UserId = userId,
-            // ProfileImage = user.ProfileImage,
-        };
-
-        return Ok(userDto);
+       return HandleResult (await _accountServices.LoginAsync(dto));
     }
 
-
-
-    [HttpPost("register")]
-    public async Task<object> RegisterAsync(RegisterDto registerDto)
+    [HttpPost("register Service!")]
+    public async Task<object> Register(RegisterDto registerDto)
     {
         var validator = new RegisterDtoValidator(_dataContext);
         var resultvalidate = validator.Validate(registerDto);
@@ -173,93 +98,11 @@ public class AccountController : BaseApiController
             return BadRequest(new { Message = "Validation Change Password is Emtry", Errors = errors });
         }
 
-        var check = await _userManager.FindByEmailAsync(registerDto.Email);
-        if (check != null)
-        {
-            return HandleResult(Result<string>.Failure("This e-mail has already been used."));
-        }
-        var Checkrole = await _roleManager.RoleExistsAsync(registerDto.Role);
-        if (!Checkrole)
-        {
-            return HandleResult(Result<string>.Failure("The specified role does not exist."));
-        }
-        var createuser = new ApplicationUser
-        {
-            UserName = registerDto.Username,
-            Email = registerDto.Email,
-            EmailConfirmed = false,
-        };
-        var result = await _userManager.CreateAsync(createuser, registerDto.Password);
-        if (!result.Succeeded)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(error.Code, error.Description);
-            }
-            return ValidationProblem();
-        }
-        await _userManager.AddToRoleAsync(createuser, registerDto.Role);
-        // สร้าง token สำหรับการยืนยันอีเมล์
-
-        Random random = new Random();
-        int randomNumber = random.Next(1000, 9999);
-        string token = randomNumber.ToString();
-
-        _memoryCache.Set("Token", token, TimeSpan.FromDays(1));
-
-        await _userManager.UpdateAsync(createuser);
-
-        if (!string.IsNullOrEmpty(token))
-        {
-            // ส่งอีเมล์ยืนยันอีเมล์ไปยังผู้ใช้
-            await SendEmailConfirmationEmail(createuser.Email, token);
-        }
-        else
-        {
-            return HandleResult(Result<string>.Failure("The email delivery was unsuccessful."));
-        }
-        return HandleResult(Result<string>.Success("Create Successfully"));
-
+        return HandleResult(await _accountServices.RegisterAsync(registerDto));
     }
 
-    private async Task SendEmailConfirmationEmail(string email, string token)
-    {
-        var cachedToken = _memoryCache.Get<string>("Token");
-        if (!string.IsNullOrEmpty(cachedToken))
-        {
-            // ส่งอีเมล์ยืนยันอีเมล์ไปยังผู้ใช้
-            var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
-            var to = new EmailAddress(email);
-            var subject = "Thank you";
-
-            var expirationTime = DateTime.Now.AddHours(24); // Assuming the token is valid for 24 hours
-
-            var htmlContent = "<div style=\"text-align: center; background-color: #f0f0f0; padding: 20px; border-radius: 10px; box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);\">";
-            htmlContent += "<img src=\"https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png\" alt=\"Your Logo\" style=\"max-width: 130px;\" />";
-            htmlContent += "<p><strong><h1 style=\"font-size:3.2em; color: #0073e6; font-family: 'Arial', sans-serif; margin-bottom: 20px;\">Confirm Your Email</h1></strong></p>";
-            htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">Thank you for registering with us!</p>";
-            htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">To complete your registration, please confirm your email address by using the following token:</p>";
-            htmlContent += $"<p><strong><h1 style=\"font-size:5em; color: #ff5733; font-family: 'Times New Roman', serif; letter-spacing: 10px;\">{cachedToken}</h1></strong></p>";
-            htmlContent += "<p style=\"font-size: 1.2em; color: #888;\">This token will expire on " + expirationTime.ToString("MMM dd, yyyy HH:mm tt") + " (UTC).</p>";
-            htmlContent += "</div>";
-            htmlContent += "<p style=\"text-align: center; font-size: 1em; color: #888; margin-top: 30px;\">If you didn't register, please ignore this email.</p>";
-
-
-
-            var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
-            await _sendGridClient.SendEmailAsync(emailMessage);
-
-            ConfirmUserDto confirmUserDto = new()
-            {
-                Email = email,
-                EmailConfirmationToken = cachedToken
-            };
-
-        }
-    }
-
-    [HttpPost("ChangePasswordForLogin")]
-    public async Task<object> ChangePassword(ChangePasswordDto dto)
+    [HttpPost("ChangePasswordForLogin Service!")]
+    public async Task<ActionResult> ChangePassword(ChangePasswordDto dto)
     {
         var validator = new ChangePasswordValidator();
         var resultvalidate = validator.Validate(dto);
@@ -269,121 +112,26 @@ public class AccountController : BaseApiController
             var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
             return BadRequest(new { Message = "Validation Change Password is Emtry", Errors = errors });
         }
-        var user = await _userManager.FindByIdAsync(dto.UserId);
-        if (user == null)
-        {
-            return HandleResult(Result<string>.Failure("UserName not found."));
-        }
 
-        if (await _userManager.CheckPasswordAsync(user, dto.Password))
-        {
-            return HandleResult(Result<string>.Failure("The new Password is the same as the current Password you are using. Please enter a Password that is different from the current one"));
-        }
-
-
-        var removePasswordResult = await _userManager.RemovePasswordAsync(user);
-
-        if (!removePasswordResult.Succeeded)
-        {
-            return HandleResult(Result<string>.Failure("Failed to remove existing password."));
-        }
-
-        var changePasswordResult = await _userManager.AddPasswordAsync(user, dto.Password);
-
-        if (!changePasswordResult.Succeeded)
-        {
-            return HandleResult(Result<string>.Failure("Failed to change password."));
-        }
-        return HandleResult(Result<string>.Success("Password changed successfully."));
+        return HandleResult (await _accountServices.ChangePasswordAsync(dto));
     }
 
-    [HttpPost("ChangeEmailForLogin")]
-    public async Task<object> ChangeUserEmail(ChangeUserEmailDto dto)
+    [HttpPost("ChangeEmailForLogin Service!")]
+    public async Task<ActionResult> ChangeUserEmail(ChangeUserEmailDto dto)
     {
         var validator = new ChangeEmailValidator();
         var resultvalidate = validator.Validate(dto);
-
         if (!resultvalidate.IsValid)
         {
             var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
             return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
-        }
-        var user = await _userManager.FindByIdAsync(dto.UserId);
-
-        if (user == null)
-        {
-            return HandleResult(Result<string>.Failure("User Not Found."));
-        }
-
-
-        if (user.Email == dto.NewEmail)
-        {
-            return HandleResult(Result<string>.Failure("The new Email is the same as the current Email you are using. Please enter a Email that is different from the current one."));
-        }
-        var result = await _userManager.SetEmailAsync(user, dto.NewEmail);
-        user.EmailConfirmed = true;
-        await _userManager.UpdateAsync(user);
-
-        if (!result.Succeeded)
-        {
-            return HandleResult(Result<string>.Failure("Fail to SetEmail."));
-        }
-        return HandleResult(Result<string>.Success("Change Email Successfuly."));
+        } 
+         
+        return HandleResult(await _accountServices.ChangeUserEmailAsync(dto));
     }
 
-    [HttpPost("ShowAllUser")]
-    public IActionResult ShowAllUser()
-    {
-        var users = _dataContext.Users.ToList();
-
-        var usersWithRoles = users.Select(user => new
-        {
-            UserId = user.Id,
-            UserNames = user.UserName,
-            Roles = _userManager.GetRolesAsync(user).Result,
-            EmailConfirm = user.EmailConfirmed,
-            AccessLoginFailed = user.AccessFailedCount,
-        }).ToList();
-
-        return Ok(usersWithRoles);
-    }
-
-    [HttpPost("AddRole")]
-    public async Task<IActionResult> AddRole(string userid, string role)
-    {
-        var user = await _userManager.FindByIdAsync(userid);
-
-        if (user == null)
-        {
-            return HandleResult(Result<string>.Failure("User not found."));
-        }
-        //RoleExistsAsync ตรวจสอบว่าบทบาทนี้มีอยู่หรือเปล่า 
-        if (!await _roleManager.RoleExistsAsync(role))
-        {
-            return HandleResult(Result<string>.Failure("There is no role."));
-        }
-
-        // IsInRoleAsync ตรวจสอบว่าผู้ใช้มีบทบาทนี้อยู่แล้วหรือเปล่า
-        if (await _userManager.IsInRoleAsync(user, role))
-        {
-            return HandleResult(Result<string>.Failure("User already has this role."));
-        }
-
-        // เพิ่มบทบาทให้กับผู้ใช้
-        var result = await _userManager.AddToRoleAsync(user, role);
-
-        if (result.Succeeded)
-        {
-            return HandleResult(Result<string>.Success($"AddRole {role} for {user.UserName} Success"));
-        }
-        else
-        {
-            return HandleResult(Result<string>.Failure("An error occurred while adding a role."));
-        }
-    }
-
-    [HttpPost("ChangeUserNameForLogin")]
-    public async Task<IActionResult> ChangeUserName(ChangeUserNameDto dto)
+    [HttpPost("ChangeUserNameForLogin Service!")]
+    public async Task<ActionResult> ChangeUserName(ChangeUserNameDto dto)
     {
         var validator = new ChangeUserNameValidator();
         var resultvalidate = validator.Validate(dto);
@@ -391,24 +139,75 @@ public class AccountController : BaseApiController
         if (!resultvalidate.IsValid)
         {
             var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
-            return BadRequest(new { Message = "Validation Change Username is Emtry", Errors = errors });
+            return BadRequest(new { Message = "Validation Change User", Errors = errors });
         }
-        var user = await _userManager.FindByIdAsync(dto.UserId);
-        if (user == null)
-        {
-            return HandleResult(Result<string>.Failure("User Not Found."));
-        }
-        if (user.UserName == dto.NewUserName)
-        {
-            return HandleResult(Result<string>.Failure("The new UserName is the same as the current UserName you are using. Please enter a UserName that is different from the current one."));
-        }
-        var result = await _userManager.SetUserNameAsync(user, dto.NewUserName);
-        if (!result.Succeeded)
-        {
-            return HandleResult(Result<string>.Failure("Fail to SetUserName."));
-        }
-        return HandleResult(Result<string>.Success("Change UserName Successfully."));
+        return HandleResult(await _accountServices.ChangeUserNameAsync(dto));
     }
+
+
+    [HttpPost("ConfirmEmail Service!")]
+    public async Task<ActionResult> ConfirmEmailUser (ConfirmEmailUserDto dto)
+    {
+
+        var validator = new ConfirmEmailUserValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation ConfirmEmail", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.ConfirmEmailUserAsync(dto));
+    }
+
+    [HttpDelete("DeleteUser Service!")]
+    public async Task<ActionResult> DeleteUser(DeleteUserDto dto)
+    {
+        var validator = new DeleteUserValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation DeleteUser", Errors = errors });
+        }
+        return HandleResult(await _accountServices.DeleteAsync(dto));
+    }
+
+    [HttpPost("ForgetPassword Service!")]
+    public async Task<ActionResult> ForgetPassword(ForgetPasswordDto dto)
+    {
+        var validator = new ForgetPasswordValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation ForgetPassword", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.ForgetPasswordAsync(dto));
+
+    }
+
+
+    [HttpPost("ResendOtpConfirmEmail")]
+    public async Task<ActionResult> ResendOtpConfirmEmail(ResendOtpConfirmEmailDto dto)
+    {
+        var validator = new ResendOtpConfirmEmailValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation ForgetPassword", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.ResendOtpConfirmEmailAsync(dto));
+    }
+
+
 
 
 }

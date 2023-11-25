@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231112070935_init1")]
+    [Migration("20231124084834_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -105,12 +105,15 @@ namespace BackendAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Servicefees")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("CategoryRooms");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Room", b =>
+            modelBuilder.Entity("BackendAPI.Models.Location", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -128,16 +131,20 @@ namespace BackendAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoomsName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StatusRooms")
+                    b.Property<string>("PlaceDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Locations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -169,21 +176,33 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "82c42698-2c6a-46a4-9f17-f6ed21f3d2a9",
+                            Id = "666a8f3e-b3db-4838-936d-62f7930a0535",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "bb0e32c1-4355-4211-b974-5e905ac65d65",
+                            Id = "725dfbc2-ded8-45b0-a0c0-756f15a6c2ed",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "a0f87fa5-dadd-4264-b010-4c046628659e",
+                            Id = "fff96334-5973-4278-98a3-8b203eb1ebe8",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
+                        },
+                        new
+                        {
+                            Id = "6d8b2484-d93f-4f4a-93bd-7ab505475e46",
+                            Name = "Approver",
+                            NormalizedName = "Approver"
+                        },
+                        new
+                        {
+                            Id = "84cfaf5f-29d3-4749-aed5-389fb1ebf4e1",
+                            Name = "Administrator",
+                            NormalizedName = "Administrator"
                         });
                 });
 

@@ -1,5 +1,4 @@
-﻿
-using BackendAPI.Core;
+﻿using BackendAPI.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BackendAPI.Controllers;

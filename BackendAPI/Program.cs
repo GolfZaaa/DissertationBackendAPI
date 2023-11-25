@@ -1,6 +1,7 @@
 using BackendAPI.Data;
 using BackendAPI.Models;
 using BackendAPI.Services;
+using BackendAPI.Services.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -50,8 +51,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 builder.Services.AddScoped<TokenService>();
 #endregion End JWT
-
-builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAccountServices, AccountService>();
+builder.Services.AddScoped<ILocationService, LocationService>();
 
 
 #region Sendgrid Start
@@ -78,6 +80,14 @@ builder.Services.AddIdentityCore<ApplicationUser>(opt =>
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 #endregion
+
+
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
+
 var app = builder.Build();
 
 #region สร้างฐานข้อมูลอัตโนมัติ
@@ -101,6 +111,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+app.UseCors("corsapp");
 
 app.UseAuthentication();
 app.UseAuthorization();

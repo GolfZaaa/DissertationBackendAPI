@@ -59,6 +59,7 @@ namespace BackendAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Servicefees = table.Column<int>(type: "int", nullable: false),
                     DateTimeCreate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -67,20 +68,21 @@ namespace BackendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Rooms",
+                name: "Locations",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoomsName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StatusRooms = table.Column<int>(type: "int", nullable: false),
+                    PlaceDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                    table.PrimaryKey("PK_Locations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -194,9 +196,11 @@ namespace BackendAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "82c42698-2c6a-46a4-9f17-f6ed21f3d2a9", null, "Student", "student" },
-                    { "a0f87fa5-dadd-4264-b010-4c046628659e", null, "Outsider", "Outsider" },
-                    { "bb0e32c1-4355-4211-b974-5e905ac65d65", null, "Professor", "Professor" }
+                    { "666a8f3e-b3db-4838-936d-62f7930a0535", null, "Student", "student" },
+                    { "6d8b2484-d93f-4f4a-93bd-7ab505475e46", null, "Approver", "Approver" },
+                    { "725dfbc2-ded8-45b0-a0c0-756f15a6c2ed", null, "Professor", "Professor" },
+                    { "84cfaf5f-29d3-4749-aed5-389fb1ebf4e1", null, "Administrator", "Administrator" },
+                    { "fff96334-5973-4278-98a3-8b203eb1ebe8", null, "Outsider", "Outsider" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -261,7 +265,7 @@ namespace BackendAPI.Migrations
                 name: "CategoryRooms");
 
             migrationBuilder.DropTable(
-                name: "Rooms");
+                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

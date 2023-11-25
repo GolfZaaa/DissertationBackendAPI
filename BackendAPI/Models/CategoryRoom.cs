@@ -3,6 +3,7 @@ public class CategoryRoom
 {
     public int Id { get; set; }
     public string Name { get; set; }
+    public int Servicefees { get; set; }
     public DateTime DateTimeCreate { get; set; }
 }
 
