@@ -226,7 +226,7 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task<Result<dynamic>> AllUsers()
+        public async Task<Result<List<object>>> AllUsers()
         {
             var users = await _dataContext.Users.ToListAsync();
 
@@ -237,9 +237,9 @@ namespace BackendAPI.Services
                 Roles = _userManager.GetRolesAsync(user).Result,
                 EmailConfirm = user.EmailConfirmed,
                 AccessLoginFailed = user.AccessFailedCount,
-            }).ToList();
+            }).ToList<object>();
 
-            return Result<dynamic>.Success(usersWithRoles);
+            return Result<List<object>>.Success(usersWithRoles);
         }
 
         public async Task<Result<string>> ChangePasswordAsync(ChangePasswordDto dto)
@@ -331,29 +331,11 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task<Result<string>> ForgetPasswordAsync(ForgetPasswordDto dto)
-        {
-            var user = await _userManager.FindByIdAsync(dto.UserId);
-
-            if (user == null) return Result<string>.Failure("User Not Found");
-
-            if (dto.Password != dto.ConfirmPassword)
-                return Result<string>.Failure("Password and confirm password do not match");
-
-            var changePasswordResult = await _userManager.RemovePasswordAsync(user);
-
-            if (!changePasswordResult.Succeeded)
-            return Result<string>.Failure("Failed to change password");
-
-            await _userManager.AddPasswordAsync(user, dto.Password);
-
-            return Result<string>.Failure("Password changed successfully");
-        }
 
         public async Task<Result<string>> ResendOtpConfirmEmailAsync(ResendOtpConfirmEmailDto dto)
         {
             _memoryCache.Remove("Token");
-            var token = GenerateOTP();
+            var token = GenerateOTPForConfirmEmail();
             _memoryCache.Set("Token", token, TimeSpan.FromDays(1));
 
             if (!string.IsNullOrEmpty(token))
@@ -365,11 +347,132 @@ namespace BackendAPI.Services
 
             return Result<string>.Success("Successful Resending");
         }
-        private string GenerateOTP()
+        private string GenerateOTPForConfirmEmail()
         {
             Random random = new Random();
             int RandomNumber = random.Next(1000, 9999);
             return RandomNumber.ToString();
         }
+
+
+
+        //Forgot Password Start
+        public async Task<Result<string>> ForgetPasswordAsync(ForgetPasswordDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(dto.UserId);
+
+            if (user == null) return Result<string>.Failure("User Not Found");
+
+            if (dto.Password != dto.ConfirmPassword)
+                return Result<string>.Failure("Password and confirm password do not match");
+
+            //ทำการเช็คโดยใช้ identity Framework 
+            //เช็คว่ารหัสที่จะเปลี่ยนตรงกับรหัส ณ ปัจจุบันที่ใช้อยู่รึเปล่า ถ้าใช่จะให้เข้า if Error   Start
+            var CheckPassword = await _userManager.CheckPasswordAsync(user, dto.Password);
+            if (CheckPassword) return Result<string>.Failure("New password must be different from the current password");
+            //เช็คว่ารหัสที่จะเปลี่ยนตรงกับรหัส ณ ปัจจุบันที่ใช้อยู่รึเปล่า ถ้าใช่จะให้เข้า if Error   End
+
+            var changePasswordResult = await _userManager.RemovePasswordAsync(user);
+
+            if (!changePasswordResult.Succeeded)
+                return Result<string>.Failure("Failed to change password");
+
+            await _userManager.AddPasswordAsync(user, dto.Password);
+
+            return Result<string>.Failure("Password changed successfully");
+        }
+
+        public async Task<Result<string>> sendOtpToForgotPasswordAsync(SendOtpToForgotPasswordDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null)
+                return Result<string>.Failure("User Not Found");
+
+            var Generate = GenerateOTPForForgotPassword();
+            _memoryCache.Set("ForgotPassword", Generate, TimeSpan.FromDays(1));
+
+            if (!string.IsNullOrEmpty(Generate))
+                // ส่งอีเมล์ยืนยันอีเมล์ไปยังผู้ใช้
+                await SendEmailForgotPassword(dto.Email, Generate);
+            else
+                return Result<string>.Failure($"Failed to send email {dto.Email}.");
+
+            return Result<string>.Success("Successful Resending");
+        }
+
+        private async Task SendEmailForgotPassword(string email, string token)
+        {
+            var cachedTokenforgotpassword = _memoryCache.Get<string>("ForgotPassword");
+            if (!string.IsNullOrEmpty(cachedTokenforgotpassword))
+            {
+                // ส่งอีเมล์ยืนยันอีเมล์ไปยังผู้ใช้
+                var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
+                var to = new EmailAddress(email);
+                var subject = "ForgotPassword";
+                var expirationTime = DateTime.Now.AddHours(24);
+
+                var htmlContent = "<div style=\"text-align: center; background-color: #f0f0f0; padding: 20px; border-radius: 10px; box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);\">";
+                htmlContent += "<img src=\"https://ip.kru.ac.th/assets/img/kru.png\" alt=\"Your Logo\" style=\"max-width: 130px;\" />";
+                htmlContent += "<p><strong><h1 style=\"font-size:2.7em; color: #0073e6; font-family: 'Arial', sans-serif; margin-bottom: 20px;\">Forgot Password</h1></strong></p>";
+                htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">Thank you for using website us!</p>";
+                htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">Enter the email address you used when you joined and we’ll send you instructions to reset your password.</p>";
+                htmlContent += $"<p><strong><h1 style=\"font-size:7em; color: #ff5733; font-family: 'Times New Roman', serif; letter-spacing: 10px; font-weight: bold;\">{cachedTokenforgotpassword}</h1></strong></p>";
+                htmlContent += "<p style=\"font-size: 1.2em; color: #888;\">This token will expire on " + expirationTime.ToString("MMM dd, yyyy HH:mm tt") + " (UTC).</p>";
+                htmlContent += "</div>";
+                htmlContent += "<p style=\"text-align: center; font-size: 1em; color: #888; margin-top: 30px;\">If you didn't register, please ignore this email.</p>";
+
+                var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
+                await _sendGridClient.SendEmailAsync(emailMessage);
+
+          
+            }
+        }
+
+        public async Task<Result<string>> ResendOtpToForgotPasswordAsync(ResendOtpToForgotPasswordDto dto)
+        {
+            _memoryCache.Remove("ForgotPassword");
+            var token = GenerateOTPForForgotPassword();
+            _memoryCache.Set("ForgotPassword", token, TimeSpan.FromDays(1));
+
+            if (!string.IsNullOrEmpty(token))
+                // ส่งอีเมล์ยืนยันอีเมล์ไปยังผู้ใช้
+                await SendEmailForgotPassword(dto.Email, token);
+            else
+                // กรณีไม่ได้รับค่า emailConfirmationUrl ที่ถูกต้อง
+                return Result<string>.Failure($"Failed to send email {dto.Email}.");
+
+            return Result<string>.Success("Successful Resending");
+        }
+
+        private string GenerateOTPForForgotPassword()
+        {
+            Random random = new Random();
+            int RandomNumber = random.Next(1000, 9999);
+            return RandomNumber.ToString();
+        }
+
+        public async Task<Result<string>> ConfirmEmailToForgotPasswordAsync(ConfirmForgotPasswordUserDto dto)
+        {
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user == null)
+                return Result<string>.Failure("Not Found User");
+
+            var token = _memoryCache.Get<string>("ForgotPassword"); // รับค่า token จาก memory cache
+
+            if (string.IsNullOrEmpty(token))
+                return Result<string>.Failure("token null.");
+
+            if (string.IsNullOrEmpty(dto.TokenConfirm))
+                return Result<string>.Failure("TokenConfirm null.");
+
+            // เช็คว่าโทเค็นที่ผู้ใช้กรอกตรงกับโทเค็นที่เก็บในแคชไหม
+            if (dto.TokenConfirm != token)
+                return Result<string>.Failure("TokenConfirm Wrong.");
+
+            return Result<string>.Failure("Confirmed token successfully go to ResetPassword.");
+        }
+        //Forgot Password End
+
     }
 }

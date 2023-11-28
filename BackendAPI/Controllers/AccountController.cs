@@ -3,6 +3,7 @@ using BackendAPI.Data;
 using BackendAPI.DTOs;
 using BackendAPI.DTOs.AccountDtos;
 using BackendAPI.Models;
+using BackendAPI.Response;
 using BackendAPI.Services;
 using BackendAPI.Services.IServices;
 using FluentValidation;
@@ -25,7 +26,7 @@ public class AccountController : BaseApiController
     private readonly IAccountServices _accountServices;
 
     public AccountController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, TokenService tokenService, DataContext dataContext,
-         IMemoryCache memoryCache, SendGridClient sendGridClient,IAccountServices accountServices)
+         IMemoryCache memoryCache, SendGridClient sendGridClient, IAccountServices accountServices)
     {
         _userManager = userManager;
         _roleManager = roleManager;
@@ -83,7 +84,7 @@ public class AccountController : BaseApiController
             return BadRequest(new { Message = "Validation Login Error", Errors = errors });
         }
 
-       return HandleResult (await _accountServices.LoginAsync(dto));
+        return HandleResult(await _accountServices.LoginAsync(dto));
     }
 
     [HttpPost("register Service!")]
@@ -113,7 +114,7 @@ public class AccountController : BaseApiController
             return BadRequest(new { Message = "Validation Change Password is Emtry", Errors = errors });
         }
 
-        return HandleResult (await _accountServices.ChangePasswordAsync(dto));
+        return HandleResult(await _accountServices.ChangePasswordAsync(dto));
     }
 
     [HttpPost("ChangeEmailForLogin Service!")]
@@ -125,8 +126,8 @@ public class AccountController : BaseApiController
         {
             var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
             return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
-        } 
-         
+        }
+
         return HandleResult(await _accountServices.ChangeUserEmailAsync(dto));
     }
 
@@ -146,7 +147,7 @@ public class AccountController : BaseApiController
 
 
     [HttpPost("ConfirmEmail Service!")]
-    public async Task<ActionResult> ConfirmEmailUser (ConfirmEmailUserDto dto)
+    public async Task<ActionResult> ConfirmEmailUser(ConfirmEmailUserDto dto)
     {
 
         var validator = new ConfirmEmailUserValidator();
@@ -161,38 +162,7 @@ public class AccountController : BaseApiController
         return HandleResult(await _accountServices.ConfirmEmailUserAsync(dto));
     }
 
-    [HttpDelete("DeleteUser Service!")]
-    public async Task<ActionResult> DeleteUser(DeleteUserDto dto)
-    {
-        var validator = new DeleteUserValidator();
-        var resultvalidate = validator.Validate(dto);
-
-        if (!resultvalidate.IsValid)
-        {
-            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
-            return BadRequest(new { Message = "Validation DeleteUser", Errors = errors });
-        }
-        return HandleResult(await _accountServices.DeleteAsync(dto));
-    }
-
-    [HttpPost("ForgetPassword Service!")]
-    public async Task<ActionResult> ForgetPassword(ForgetPasswordDto dto)
-    {
-        var validator = new ForgetPasswordValidator();
-        var resultvalidate = validator.Validate(dto);
-
-        if (!resultvalidate.IsValid)
-        {
-            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
-            return BadRequest(new { Message = "Validation ForgetPassword", Errors = errors });
-        }
-
-        return HandleResult(await _accountServices.ForgetPasswordAsync(dto));
-
-    }
-
-
-    [HttpPost("ResendOtpConfirmEmail")]
+    [HttpPost("ResendOtpConfirmEmail Service!")]
     public async Task<ActionResult> ResendOtpConfirmEmail(ResendOtpConfirmEmailDto dto)
     {
         var validator = new ResendOtpConfirmEmailValidator();
@@ -208,6 +178,86 @@ public class AccountController : BaseApiController
     }
 
 
+    [HttpDelete("DeleteUser Service!")]
+    public async Task<ActionResult> DeleteUser(DeleteUserDto dto)
+    {
+        var validator = new DeleteUserValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation DeleteUser", Errors = errors });
+        }
+        return HandleResult(await _accountServices.DeleteAsync(dto));
+    }
+
+
+
+
+
+
+
+    [HttpPost("ForgetPassword For Reset Password Service!")]
+    public async Task<ActionResult> ForgetPassword(ForgetPasswordDto dto)
+    {
+        var validator = new ForgetPasswordValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation ForgetPassword", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.ForgetPasswordAsync(dto));
+
+    }
+
+    [HttpPost("ConfirmEmailToForgotPassword Service!")]
+    public async Task<ActionResult> ConfirmEmailToForgotPassword(ConfirmForgotPasswordUserDto dto)
+    {
+        var validator = new ConfirmForgotPasswordUserValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation ForgetPassword", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.ConfirmEmailToForgotPasswordAsync(dto));
+    }
+
+    [HttpPost("SendOTPToForgotPassword Service!")]
+    public async Task<ActionResult> SendOtpToForgotPassword(SendOtpToForgotPasswordDto dto)
+    {
+        var validator = new SendOtpToForgotPasswordValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation DeleteUser", Errors = errors });
+        }
+
+        return HandleResult(await _accountServices.sendOtpToForgotPasswordAsync(dto));
+
+    }
+
+    [HttpPost("ResendOTPToForgotPassword Service!")]
+    public async Task<ActionResult> ResendOTPToForgotPassword(ResendOtpToForgotPasswordDto dto)
+    {
+        var validator = new ResendOtpToForgotPasswordValidator();
+        var resultvalidate = validator.Validate(dto);
+
+        if (!resultvalidate.IsValid)
+        {
+            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation DeleteUser", Errors = errors });
+        }
+        return HandleResult(await _accountServices.ResendOtpToForgotPasswordAsync(dto));
+    }
 
 
 }

@@ -54,6 +54,7 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAccountServices, AccountService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 
 #region Sendgrid Start

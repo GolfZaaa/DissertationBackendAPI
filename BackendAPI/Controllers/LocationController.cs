@@ -63,7 +63,6 @@ public class LocationController : BaseApiController
         return HandleResult(await _locationService.CreateLocationAsync(dto));
     }
 
-
     [HttpGet("ShowLoaction Service!")]
     public async Task<ActionResult> ShowLocation()
     {
