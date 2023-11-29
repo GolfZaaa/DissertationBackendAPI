@@ -18,14 +18,35 @@ namespace BackendAPI.Services
             _userManager = userManager;
         }
 
-        public Task<Result<string>> CreateRoleAsync(RoleDto roleDto)
+        public async Task<Result<string>> CreateRoleAsync(RoleDto dto)
         {
-            throw new NotImplementedException();
+            var identityRole = new IdentityRole
+            {
+                Name = dto.Name,
+                NormalizedName = _roleManager.NormalizeKey(dto.Name)
+            };
+            var result = await _roleManager.CreateAsync(identityRole);
+
+            if (!result.Succeeded)
+            {
+                return Result<string>.Failure("Create Role Failed.");
+            }
+            return Result<string>.Success("Create Success");
         }
 
-        public Task<Result<string>> DeleteRoleAsync(RoleDto roleDto)
+        public async Task<Result<string>> DeleteRoleAsync(RoleDto dto)
         {
-            throw new NotImplementedException();
+            var identityRole = await _roleManager.FindByNameAsync(dto.Name);
+            if (identityRole == null) return Result<string>.Failure("Not Found Role");
+
+            //ตรวจสอบมีผู้ใช้บทบาทนี้หรือไม่
+            var usersInRole = await _userManager.GetUsersInRoleAsync(dto.Name);
+            if (usersInRole.Count != 0) return Result<string>.Failure("User Have Role This Can't Delete.");
+            var result = await _roleManager.DeleteAsync(identityRole);
+            if (!result.Succeeded)
+                return Result<string>.Success("Falied to Delete");
+
+            return Result<string>.Success("Delete Success");
         }
 
         public async Task<Result<List<object>>> GetRoleAsync()
@@ -39,9 +60,21 @@ namespace BackendAPI.Services
             return Result<List<object>>.Success(usersWithRoles);
         }
 
-        public Task<Result<string>> UpdateRoleAsync(RoleUpdateDto roleUpdateDto)
+        public async Task<Result<string>> UpdateRoleAsync(RoleUpdateDto dto)
         {
-            throw new NotImplementedException();
+            var identityRole = await _roleManager.FindByNameAsync(dto.Name);
+
+            if (identityRole == null) return Result<string>.Failure("Not Found Role ");
+
+            identityRole.Name = dto.UpdateName;
+            identityRole.NormalizedName = _roleManager.NormalizeKey(dto.UpdateName);
+
+            var result = await _roleManager.UpdateAsync(identityRole);
+            if (!result.Succeeded)
+            {
+                return Result<string>.Failure("Failed to Update Role.");
+            }
+            return Result<string>.Success("Update Role Success");
         }
     }
 }

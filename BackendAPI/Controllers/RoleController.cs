@@ -1,4 +1,5 @@
 ﻿using BackendAPI.Core;
+using BackendAPI.DTOs.AccountDtos;
 using BackendAPI.DTOs.RolesDtos;
 using BackendAPI.Models;
 using BackendAPI.Services.IServices;
@@ -23,79 +24,53 @@ namespace BackendAPI.Controllers
             _roleService = roleService;
         }
 
-        [HttpGet("Show Roles")]
+        [HttpGet("Show Roles Service!")]
         public async Task<ActionResult> GetRoles()
         {
-            var result = await _roleManager.Roles.ToListAsync();
-            return Ok(result);
-
+            return HandleResult(await _roleService.GetRoleAsync());
         }
 
-        [HttpPost("CreateRole")]
-        public async Task<IActionResult> CreateRole(RoleDto roleDto)
+        [HttpPost("CreateRole Service!")]
+        public async Task<IActionResult> CreateRole(RoleDto dto)
         {
-            var identityRole = new IdentityRole
+            var validator = new RoleValidator();
+            var resultvalidate = validator.Validate(dto);
+            if (!resultvalidate.IsValid)
             {
-                Name = roleDto.Name,
-                NormalizedName = _roleManager.NormalizeKey(roleDto.Name)
-            };
-            var result = await _roleManager.CreateAsync(identityRole);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
+                var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+                return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
             }
-            return StatusCode(201);
+            return HandleResult(await _roleService.CreateRoleAsync(dto));
         }
 
 
-        [HttpPut("UpdateRole")]
+        [HttpPut("UpdateRole Service!")]
         public async Task<ActionResult> Update(RoleUpdateDto dto)
         {
-            var identityRole = await _roleManager.FindByNameAsync(dto.Name);
-
-            if (identityRole == null) return NotFound();
-
-
-            identityRole.Name = dto.UpdateName;
-            identityRole.NormalizedName = _roleManager.NormalizeKey(dto.UpdateName);
-
-
-            var result = await _roleManager.UpdateAsync(identityRole);
-            if (!result.Succeeded)
+            var validator = new RoleUpdateValidator();
+            var resultvalidate = validator.Validate(dto);
+            if (!resultvalidate.IsValid)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
+                var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+                return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
             }
-            return StatusCode(201);
+
+            return HandleResult(await _roleService.UpdateRoleAsync(dto));
 
         }
 
 
-        [HttpDelete("Delete Role")]
-        public async Task<IActionResult> Delete(RoleDto roleDto)
+        [HttpDelete("Delete Role Service!")]
+        public async Task<IActionResult> Delete(RoleDto dto)
         {
-            var identityRole = await _roleManager.FindByNameAsync(roleDto.Name);
-            if (identityRole == null) return NotFound();
-            //ตรวจสอบมีผู้ใช้บทบาทนี้หรือไม่
-            var usersInRole = await _userManager.GetUsersInRoleAsync(roleDto.Name);
-            if (usersInRole.Count != 0) return BadRequest();
-            var result = await _roleManager.DeleteAsync(identityRole);
-            if (!result.Succeeded)
+            var validator = new RoleValidator();
+            var resultvalidate = validator.Validate(dto);
+            if (!resultvalidate.IsValid)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
+                var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
+                return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
             }
-            return StatusCode(201);
+            return HandleResult (await _roleService.DeleteRoleAsync(dto));
         }
 
 
