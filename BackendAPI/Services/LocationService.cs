@@ -1,19 +1,23 @@
-﻿using BackendAPI.Core;
+﻿using AutoMapper;
+using BackendAPI.Core;
 using BackendAPI.Data;
 using BackendAPI.DTOs.RoomsDto;
 using BackendAPI.Models;
 using BackendAPI.Response;
 using BackendAPI.Services.IServices;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendAPI.Services;
 public class LocationService : ILocationService
 {
     private readonly DataContext _dataContext;
+    private readonly IMapper _mapper;
 
-    public LocationService(DataContext dataContext)
+    public LocationService(DataContext dataContext, IMapper mapper)
     {
         _dataContext = dataContext;
+        _mapper = mapper;
     }
 
     public async Task<Result<dynamic>> CategoryRoomallAsync()
@@ -52,6 +56,8 @@ public class LocationService : ILocationService
         {
             return Result<string>.Failure("Category Not Found.");
         }
+
+        var map = _mapper.Map<Location>(dto);
 
         if (_dataContext.Locations.Any(x => x.Name == dto.LocationName))
         {
@@ -123,14 +129,53 @@ public class LocationService : ILocationService
         await _dataContext.SaveChangesAsync();
         return Result<string>.Success($"Delete Location ID {id} Success");
     }
-    public async Task<Result<dynamic>> ShowLocationAsync()
+    public async Task<Result<List<Location>>> ShowLocationAsync()
     {
-        var result = await _dataContext.Locations.ToListAsync();
+        var result = await _dataContext.Locations.Include(a=>a.locationImages).OrderByDescending(x=>x.Id).ToListAsync();
         if (result == null || result.Count == 0)
         {
-            return Result<dynamic>.Failure("Notfound Location");
+            return Result< List<Location>>.Failure("Notfound Location");
         }
-        return Result<dynamic>.Success(result);
+        return Result< List<Location>>.Success(result);
+    }
+
+    public async Task<Result<string>> UpdateLocationAsync([FromForm] UpdateLocationDto dto)
+    {
+        var result = await _dataContext.Locations.FindAsync(dto.Id);
+
+        if (result == null) return Result<string>.Failure("Not Found Location");
+
+        string oldImageName = result.Image;
+
+        result.Name = dto.LocationName;
+        result.Capacity = dto.Capacity;
+        result.PlaceDescription = dto.PlaceDescription;
+        result.CategoryId = dto.CategoryId;
+
+        string PathImage = "wwwroot/LocationImage";
+        if (dto.Image != null)
+        {
+            string ImageFileName = "Location_" + Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
+
+            var imagePath = Path.Combine(PathImage, ImageFileName);
+
+            using (var stream = new FileStream(imagePath, FileMode.Create))
+            {
+                await dto.Image.CopyToAsync(stream);
+            }
+
+            if (!string.IsNullOrEmpty(oldImageName))
+            {
+                string oldImageFilePath = Path.Combine(PathImage, oldImageName);
+                if (System.IO.File.Exists(oldImageFilePath))
+                {
+                    System.IO.File.Delete(oldImageFilePath);
+                }
+                result.Image = ImageFileName;
+            }
+        }
+        await _dataContext.SaveChangesAsync();
+        return Result<string>.Success("Update Location Success");
     }
 }
 

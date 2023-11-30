@@ -1,3 +1,5 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using BackendAPI.Data;
 using BackendAPI.Models;
 using BackendAPI.Services;
@@ -9,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SendGrid;
 using Swashbuckle.AspNetCore.Filters;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,10 +55,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<TokenService>();
 #endregion End JWT
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IAccountServices, AccountService>();
-builder.Services.AddScoped<ILocationService, LocationService>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-
 
 #region Sendgrid Start
 // เพิ่มการกำหนดค่า SendGridClient
@@ -88,6 +87,15 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
+
+//ใช้ AutoRefac ลงทะเบียนโดยอัตโนมัติกรณีมีหลายๆ Service
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(containerBuilder =>
+{
+    containerBuilder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
+    .Where(t => t.Name.EndsWith("Service") || t.Name.EndsWith("Test"))
+    .AsImplementedInterfaces();
+}));
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 var app = builder.Build();
 

@@ -4,6 +4,7 @@ using BackendAPI.DTOs.RoomsDto;
 using BackendAPI.Models;
 using BackendAPI.Response;
 using BackendAPI.Services.IServices;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -63,10 +64,40 @@ public class LocationController : BaseApiController
         return HandleResult(await _locationService.CreateLocationAsync(dto));
     }
 
+    [HttpPost("Update Locations")]
+    public async Task<ActionResult> UpdateLocation([FromForm]UpdateLocationDto dto)
+    {
+
+        var validator = new UpdateLocationDtoValidator();
+        var valida = validator.Validate(dto);
+
+        if (!valida.IsValid)
+        {
+            var errors = valida.Errors.Select(error => error.ErrorMessage).ToList();
+            return BadRequest(new { Message = "Validation Create Error", Errors = errors });
+        }
+
+
+        return HandleResult(await _locationService.UpdateLocationAsync(dto));
+    }
+
     [HttpGet("ShowLoaction Service!")]
     public async Task<ActionResult> ShowLocation()
     {
-        return HandleResult(await _locationService.ShowLocationAsync());
+        //return HandleResult(await _locationService.ShowLocationAsync());
+        var result = await _locationService.ShowLocationAsync();
+
+        var locations = result.Value;
+
+        if(locations != null && locations.Any())
+        {
+            var response = locations.Select(LocationResponse.FromLocation).ToList();
+            return Ok(response);
+        }
+        else
+        {
+            return NotFound("No locations found");
+        }
     }
 
     [HttpDelete("DeleteLocation Service!")]                                                                                                                                                                                                                                                                           
@@ -74,5 +105,13 @@ public class LocationController : BaseApiController
     {
        return HandleResult(await _locationService.DeleteLocationAsync(id));
     }
+
+    [HttpGet("GetCategory Using Location")]
+    public async Task<ActionResult> GetCategory()
+    {
+        var result = await _dataContext.Locations.GroupBy(x=>x.CategoryId).Select(a=>a.Key).ToArrayAsync();
+        return Ok(result);
+    }
+
 
 }

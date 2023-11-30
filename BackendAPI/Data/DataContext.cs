@@ -35,6 +35,7 @@ namespace BackendAPI.Data
         //public DbSet<LoginAttempt> LoginAttempts { get; set; }
         public DbSet<CategoryRoom> CategoryRooms { get; set; }
         public DbSet<Location> Locations { get; set; }
+        public DbSet<LocationImage> locationImages { get; set; }
 
 
     }

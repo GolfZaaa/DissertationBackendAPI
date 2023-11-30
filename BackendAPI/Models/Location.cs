@@ -11,5 +11,7 @@ namespace BackendAPI.Models
         public string PlaceDescription { get; set; }
         public int Status { get; set; }
         public int CategoryId { get; set; }
+
+        public List<LocationImage> locationImages { get; set; }
     }
 }
