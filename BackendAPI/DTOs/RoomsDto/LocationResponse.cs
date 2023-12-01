@@ -4,7 +4,7 @@ namespace BackendAPI.DTOs.RoomsDto;
     public class LocationResponse
     {
     public int Id { get; set; }
-    public string LocationName { get; set; }
+    public string Name { get; set; }
         public int Capacity { get; set; }
         public string Image { get; set; }
         public string PlaceDescription { get; set; }
@@ -16,7 +16,7 @@ namespace BackendAPI.DTOs.RoomsDto;
         return new LocationResponse
         {
             Id = location.Id,
-            LocationName = location.Name,
+            Name = location.Name,
             Capacity = location.Capacity,
             Image = location.Image,
             PlaceDescription = location.PlaceDescription,

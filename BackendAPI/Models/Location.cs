@@ -9,9 +9,9 @@ namespace BackendAPI.Models
         public int Capacity { get; set; }
         public string Image { get; set; }
         public string PlaceDescription { get; set; }
-        public int Status { get; set; }
+        public int Status { get; set; } = 1;
         public int CategoryId { get; set; }
 
-        public List<LocationImage> locationImages { get; set; }
+        public List<LocationImages> locationImages { get; set; }
     }
 }

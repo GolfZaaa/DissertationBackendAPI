@@ -1,12 +1,10 @@
-﻿using BackendAPI.Data;
-using BackendAPI.Models;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace BackendAPI.DTOs.RoomsDto;
-
-public class CreateLocationDto
-{
-    public string LocationName { get; set; }
+    public class LocationRequest
+    {
+    public int? Id { get; set; }
+    public string Name { get; set; }
     public int Capacity { get; set; }
     public IFormFile Image { get; set; }
     public string PlaceDescription { get; set; }
@@ -15,15 +13,15 @@ public class CreateLocationDto
 }
 
 
-public class CreateLocationDtoValidator : AbstractValidator<CreateLocationDto>
+public class LocationRequestValidator : AbstractValidator<LocationRequest>
 {
-    public CreateLocationDtoValidator()
+    public LocationRequestValidator()
     {
-        RuleFor(x => x.LocationName).NotEmpty().WithMessage("LocationName is empty");
+        RuleFor(x => x.Name).NotEmpty().WithMessage("LocationName is empty");
         RuleFor(x => x.Capacity).NotEmpty().WithMessage("Capacity is empty");
+        RuleFor(x => x.Image).NotEmpty().WithMessage("Image is empty");
         RuleFor(x => x.PlaceDescription).NotEmpty().WithMessage("PlaceDescription is empty");
         RuleFor(x => x.CategoryId).NotEmpty().WithMessage("CategoryId is empty");
-        RuleFor(x => x.Image).NotEmpty().WithMessage("Image is empty");
     }
 
 }

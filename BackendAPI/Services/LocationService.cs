@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using BackendAPI.Core;
 using BackendAPI.Data;
 using BackendAPI.DTOs.RoomsDto;
@@ -13,55 +14,51 @@ public class LocationService : ILocationService
 {
     private readonly DataContext _dataContext;
     private readonly IMapper _mapper;
+    private readonly IUploadFileService _uploadFileService;
 
-    public LocationService(DataContext dataContext, IMapper mapper)
+    public LocationService(DataContext dataContext, IMapper mapper,IUploadFileService uploadFileService)
     {
         _dataContext = dataContext;
         _mapper = mapper;
+        _uploadFileService = uploadFileService;
     }
-
-    public async Task<Result<dynamic>> CategoryRoomallAsync()
+    public async Task<Result<string>> CreateLocationAsync(LocationRequest dto)
     {
-        var result = await _dataContext.CategoryRooms.ToListAsync();
-        if (result == null || result.Count == 0)
-        {
-            return Result<dynamic>.Failure("Notfound Category");
-        }
-        return Result<dynamic>.Success(result);
-    }
 
-    public async Task<Result<string>> CreateCategoryAsync(CreateCategoryDto dto)
-    {
-        if (_dataContext.CategoryRooms.Any(x => x.Name == dto.Name))
+        var test = await _dataContext.Locations.FirstOrDefaultAsync(x => x.Name == dto.Name);
+        if (test != null)
         {
-            return Result<string>.Failure("Category Name is already in use.");
+            return Result<string>.Failure("Room Name is already use.");
         }
 
-        var category = new CategoryRoom
-        {
-            Name = dto.Name,
-            DateTimeCreate = DateTime.Now,
-            Servicefees = dto.Servicefees,
-        };
-        _dataContext.Add(category);
+
+        //อัพโหลดไฟล์ Start
+        (string errorMessage, List<string> imageNames) = await UploadImageAsync(dto.FormFiles);
+        if (!string.IsNullOrEmpty(errorMessage)) return Result<string>.Failure("Fail to UploadImages");
+
+
+        var map = _mapper.Map<Location>(dto);
+        _dataContext.Locations.Add(map);
         await _dataContext.SaveChangesAsync();
 
-        return Result<string>.Success("Category created successfully");
-    }
+        //จัดการไฟล์ในฐานข้อมูล
+        if (imageNames.Count > 0)
+        {
+            var images = new List<LocationImages>();
+            foreach (var image in imageNames)
+            {
+                images.Add(new LocationImages { LocationId = map.Id, Image = image });
+            }
+            await _dataContext.locationImages.AddRangeAsync(images);
+        }
 
-    public async Task<Result<string>> CreateLocationAsync(CreateLocationDto dto)
-    {
-        var existingCategory = await _dataContext.CategoryRooms.FindAsync(dto.CategoryId);
+
+        await _dataContext.SaveChangesAsync();
+
+        var existingCategory = await _dataContext.CategoryLocations.FindAsync(dto.CategoryId);
         if (existingCategory == null)
         {
             return Result<string>.Failure("Category Not Found.");
-        }
-
-        var map = _mapper.Map<Location>(dto);
-
-        if (_dataContext.Locations.Any(x => x.Name == dto.LocationName))
-        {
-            return Result<string>.Failure("Room Name is already in use.");
         }
 
         string imageFileName = "";
@@ -69,42 +66,17 @@ public class LocationService : ILocationService
 
         if (dto.Image != null)
         {
-            imageFileName = "Location_" + Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
+            imageFileName = "Lo_" + Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
             var imagePath = Path.Combine(uploadDirectory, imageFileName);
 
             using (var stream = new FileStream(imagePath, FileMode.Create))
             {
                 await dto.Image.CopyToAsync(stream);
             }
+            map.Image = imageFileName;
+            await _dataContext.SaveChangesAsync();
         }
-
-        var room = new Location
-        {
-            Name = dto.LocationName,
-            Capacity = dto.Capacity,
-            Image = imageFileName,
-            PlaceDescription = dto.PlaceDescription,
-            Status = 1,
-            CategoryId = dto.CategoryId,
-        };
-
-        _dataContext.Locations.Add(room);
-        await _dataContext.SaveChangesAsync();
-        return Result<string>.Success("Location created successfully");
-    }
-
-    public async Task<Result<string>> DeleteCategorysAsync(int id)
-    {
-        var category = await _dataContext.CategoryRooms.FindAsync(id);
-
-        if (category == null)
-        {
-            return Result<string>.Failure("Not Found Category");
-        }
-
-        _dataContext.CategoryRooms.Remove(category);
-        await _dataContext.SaveChangesAsync();
-        return Result<string>.Success($"Delete Category ID{id} Success");
+        return Result<string>.Success($"Create Location Success {map.Image}");
     }
 
     public async Task<Result<string>> DeleteLocationAsync(int id)
@@ -176,6 +148,23 @@ public class LocationService : ILocationService
         }
         await _dataContext.SaveChangesAsync();
         return Result<string>.Success("Update Location Success");
+    }
+
+    public async Task<(string errorMessage, List<string> imageNames)> UploadImageAsync(IFormFileCollection formFiles)
+    {
+        var errorMessage = string.Empty;
+        var imageNames = new List<string>();
+        if (_uploadFileService.IsUpload(formFiles))
+        {
+            errorMessage = _uploadFileService.Validation(formFiles);
+            if (string.IsNullOrEmpty(errorMessage))
+            {
+                //บันทึกลงไฟล์ในโฟลเดอร์ 
+                imageNames = await _uploadFileService.UploadImages(formFiles);
+            }
+        }
+        return (errorMessage, imageNames);
+
     }
 }
 

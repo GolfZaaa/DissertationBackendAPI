@@ -8,8 +8,8 @@ namespace BackendAPI.Mapper
     {
         public AutoMapperProfile()
         {
-            CreateMap<Location, CreateLocationDto>();
-            CreateMap<CreateLocationDto, Location>();
+            CreateMap<Location, LocationRequest>();
+            CreateMap<LocationRequest, Location>();
 
             CreateMap<Location, LocationResponse>();
             CreateMap<LocationResponse, Location>();

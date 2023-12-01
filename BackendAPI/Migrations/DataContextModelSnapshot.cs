@@ -87,7 +87,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.CategoryRoom", b =>
+            modelBuilder.Entity("BackendAPI.Models.CategoryLocations", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -107,7 +107,7 @@ namespace BackendAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoryRooms");
+                    b.ToTable("CategoryLocations");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.Location", b =>
@@ -144,7 +144,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("Locations");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.LocationImage", b =>
+            modelBuilder.Entity("BackendAPI.Models.LocationImages", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -195,31 +195,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "e830eb70-d545-4cb0-b76f-2fd14ccc8523",
+                            Id = "b43fc241-881a-4233-bc97-5d0b9180bcfb",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "7c1ff502-3a54-47dc-b409-e40400599b07",
+                            Id = "6ef74a43-390c-4c92-9028-3d6023b2bb3d",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "d80139ec-5d3e-4f70-b038-b99e822146d5",
+                            Id = "a4e47548-0ad1-4b7e-9254-a33fe9e4c07c",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "559fda30-8e4e-438a-937b-4f4bf540b53e",
+                            Id = "d37a7d2a-e04d-43ee-86cc-a3d046eb9dce",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "906494a0-3798-4269-bca0-05d8bcd945c7",
+                            Id = "f0af4f0f-2157-41c4-9516-5370e3ed9805",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -331,7 +331,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.LocationImage", b =>
+            modelBuilder.Entity("BackendAPI.Models.LocationImages", b =>
                 {
                     b.HasOne("BackendAPI.Models.Location", "Location")
                         .WithMany("locationImages")

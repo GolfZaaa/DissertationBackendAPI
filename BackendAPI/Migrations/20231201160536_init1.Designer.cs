@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231124084834_init1")]
+    [Migration("20231201160536_init1")]
     partial class init1
     {
         /// <inheritdoc />
@@ -90,7 +90,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.CategoryRoom", b =>
+            modelBuilder.Entity("BackendAPI.Models.CategoryLocations", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,7 +110,7 @@ namespace BackendAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CategoryRooms");
+                    b.ToTable("CategoryLocations");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.Location", b =>
@@ -147,6 +147,28 @@ namespace BackendAPI.Migrations
                     b.ToTable("Locations");
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.LocationImages", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("locationImages");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -176,31 +198,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "666a8f3e-b3db-4838-936d-62f7930a0535",
+                            Id = "b43fc241-881a-4233-bc97-5d0b9180bcfb",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "725dfbc2-ded8-45b0-a0c0-756f15a6c2ed",
+                            Id = "6ef74a43-390c-4c92-9028-3d6023b2bb3d",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "fff96334-5973-4278-98a3-8b203eb1ebe8",
+                            Id = "a4e47548-0ad1-4b7e-9254-a33fe9e4c07c",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "6d8b2484-d93f-4f4a-93bd-7ab505475e46",
+                            Id = "d37a7d2a-e04d-43ee-86cc-a3d046eb9dce",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "84cfaf5f-29d3-4749-aed5-389fb1ebf4e1",
+                            Id = "f0af4f0f-2157-41c4-9516-5370e3ed9805",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -312,6 +334,17 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.LocationImages", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Location", "Location")
+                        .WithMany("locationImages")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -361,6 +394,11 @@ namespace BackendAPI.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.Location", b =>
+                {
+                    b.Navigation("locationImages");
                 });
 #pragma warning restore 612, 618
         }

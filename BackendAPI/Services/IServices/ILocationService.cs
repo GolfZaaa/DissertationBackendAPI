@@ -6,11 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace BackendAPI.Services.IServices;
     public interface ILocationService
     {
-    Task<Result<string>> CreateCategoryAsync(CreateCategoryDto dto);
-    Task<Result<dynamic>> CategoryRoomallAsync();
-    Task<Result<string>> DeleteCategorysAsync(int id);
-    Task<Result<string>> CreateLocationAsync(CreateLocationDto dto);
+    Task<Result<string>> CreateLocationAsync(LocationRequest dto);
     Task<Result<List<Location>>> ShowLocationAsync();
     Task<Result<string>> DeleteLocationAsync(int id);
     Task<Result<string>> UpdateLocationAsync([FromForm] UpdateLocationDto dto);
+    Task<(string errorMessage, List<string> imageNames)> UploadImageAsync(IFormFileCollection formFiles);
 }
