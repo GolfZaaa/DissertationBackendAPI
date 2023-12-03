@@ -37,39 +37,25 @@ public class LocationController : BaseApiController
     }
 
     [HttpPost("Update Locations Service")]
-    public async Task<ActionResult> UpdateLocation([FromForm]UpdateLocationDto dto)
+    public async Task<ActionResult> UpdateLocation([FromForm] LocationRequest dto)
     {
-
-        var validator = new UpdateLocationDtoValidator();
-        var valida = validator.Validate(dto);
-
-        if (!valida.IsValid)
-        {
-            var errors = valida.Errors.Select(error => error.ErrorMessage).ToList();
-            return BadRequest(new { Message = "Validation Create Error", Errors = errors });
-        }
-
-
         return HandleResult(await _locationService.UpdateLocationAsync(dto));
     }
+
+    [HttpGet("GetLocationById")]
+    public async Task<IActionResult> GetByIdAsync(int id)
+    {
+        var locationResult = await _locationService.GetByIdAsync(id);
+        var locationResponse = LocationResponse.FromLocation(locationResult.Value);
+        return Ok(locationResponse);
+    }
+
+
 
     [HttpGet("ShowLoaction Service!")]
     public async Task<ActionResult> ShowLocation()
     {
-        //return HandleResult(await _locationService.ShowLocationAsync());
-        var result = await _locationService.ShowLocationAsync();
-
-        var locations = result.Value;
-
-        if(locations != null && locations.Any())
-        {
-            var response = locations.Select(LocationResponse.FromLocation).ToList();
-            return Ok(response);
-        }
-        else
-        {
-            return NotFound("No locations found");
-        }
+        return HandleResult(await _locationService.ShowLocationAsync());
     }
 
     [HttpDelete("DeleteLocation Service!")]                                                                                                                                                                                                                                                                           

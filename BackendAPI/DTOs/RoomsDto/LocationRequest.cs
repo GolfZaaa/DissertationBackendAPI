@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using BackendAPI.Models;
+using FluentValidation;
 
 namespace BackendAPI.DTOs.RoomsDto;
     public class LocationRequest

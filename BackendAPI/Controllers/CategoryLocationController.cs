@@ -53,7 +53,7 @@ namespace BackendAPI.Controllers
         [HttpGet("GetCategory Using Location")]
         public async Task<ActionResult> GetCategory()
         {
-            var result = await _dataContext.Locations.GroupBy(x => x.CategoryId).Select(a => a.Key).ToArrayAsync();
+            var result = await _dataContext.Locations.GroupBy(x => x.Category).Select(a => a.Key).ToArrayAsync();
             return Ok(result);
         }
 

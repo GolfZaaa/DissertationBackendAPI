@@ -10,8 +10,9 @@ namespace BackendAPI.Models
         public string Image { get; set; }
         public string PlaceDescription { get; set; }
         public int Status { get; set; } = 1;
-        public int CategoryId { get; set; }
+        //public int CategoryId { get; set; }
+        public CategoryLocations Category { get; set; }
 
-        public List<LocationImages> locationImages { get; set; }
+        public List<LocationImages> locationImages { get; set; } = new List<LocationImages>();
     }
 }

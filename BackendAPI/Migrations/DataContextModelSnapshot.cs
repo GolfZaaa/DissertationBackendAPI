@@ -141,6 +141,8 @@ namespace BackendAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("Locations");
                 });
 
@@ -156,7 +158,7 @@ namespace BackendAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("LocationId")
+                    b.Property<int?>("LocationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -195,31 +197,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b43fc241-881a-4233-bc97-5d0b9180bcfb",
+                            Id = "7379994e-9c4b-4af3-939f-d6057cc6a5ac",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "6ef74a43-390c-4c92-9028-3d6023b2bb3d",
+                            Id = "24cc009a-dde1-47f7-8362-44b402f0bd34",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "a4e47548-0ad1-4b7e-9254-a33fe9e4c07c",
+                            Id = "5356b5b5-5f53-4e9e-8511-05e88838db65",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "d37a7d2a-e04d-43ee-86cc-a3d046eb9dce",
+                            Id = "1a5aefe9-0a29-4013-a0b5-29b66a1614fd",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "f0af4f0f-2157-41c4-9516-5370e3ed9805",
+                            Id = "a9756bd2-eb65-4fbe-947d-6af830269837",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -331,15 +333,23 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.LocationImages", b =>
+            modelBuilder.Entity("BackendAPI.Models.Location", b =>
                 {
-                    b.HasOne("BackendAPI.Models.Location", "Location")
-                        .WithMany("locationImages")
-                        .HasForeignKey("LocationId")
+                    b.HasOne("BackendAPI.Models.CategoryLocations", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.LocationImages", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Location", null)
+                        .WithMany("locationImages")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -12,43 +12,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using SendGrid;
-using SendGrid.Helpers.Mail;
 
 namespace BackendAPI.Controllers;
 public class AccountController : BaseApiController
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly TokenService _tokenService;
     private readonly DataContext _dataContext;
-    private readonly IMemoryCache _memoryCache;
-    private readonly SendGridClient _sendGridClient;
     private readonly IAccountServices _accountServices;
 
-    public AccountController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, TokenService tokenService, DataContext dataContext,
-         IMemoryCache memoryCache, SendGridClient sendGridClient, IAccountServices accountServices)
+    public AccountController(DataContext dataContext, IAccountServices accountServices)
     {
-        _userManager = userManager;
-        _roleManager = roleManager;
-        _tokenService = tokenService;
         _dataContext = dataContext;
-        _memoryCache = memoryCache;
-        _sendGridClient = sendGridClient;
         _accountServices = accountServices;
-    }
-
-
-    [HttpGet("ShowUser")]
-    public async Task<IActionResult> Get()
-    {
-        var result = await _userManager.Users.ToListAsync();
-        List<Object> users = new();
-        foreach (var user in result)
-        {
-            var userRole = await _userManager.GetRolesAsync(user);
-            users.Add(new { user.UserName, userRole });
-        }
-        return Ok(users);
     }
 
     [HttpGet("ShowAllUser Service!")]
@@ -145,7 +119,6 @@ public class AccountController : BaseApiController
         return HandleResult(await _accountServices.ChangeUserNameAsync(dto));
     }
 
-
     [HttpPost("ConfirmEmail Service!")]
     public async Task<ActionResult> ConfirmEmailUser(ConfirmEmailUserDto dto)
     {
@@ -177,7 +150,6 @@ public class AccountController : BaseApiController
         return HandleResult(await _accountServices.ResendOtpConfirmEmailAsync(dto));
     }
 
-
     [HttpDelete("DeleteUser Service!")]
     public async Task<ActionResult> DeleteUser(DeleteUserDto dto)
     {
@@ -191,12 +163,6 @@ public class AccountController : BaseApiController
         }
         return HandleResult(await _accountServices.DeleteAsync(dto));
     }
-
-
-
-
-
-
 
     [HttpPost("ForgetPassword For Reset Password Service!")]
     public async Task<ActionResult> ForgetPassword(ForgetPasswordDto dto)

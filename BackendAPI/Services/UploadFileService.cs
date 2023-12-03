@@ -14,6 +14,21 @@ public class UploadFileService : IUploadFileService
         _configuration = configuration;     //เข้าหา appsettings.json  
     }
 
+    public Task DeleteFileImages(List<string> files)
+    {
+        string wwwRootPath = _webHostEnvironment.WebRootPath;
+        foreach (var item in files)
+        {
+            var file = Path.Combine("LocationImages", item);
+            var oldImagePath = Path.Combine(wwwRootPath, file);
+            if (System.IO.File.Exists(oldImagePath))
+            {
+                System.IO.File.Delete(oldImagePath);
+            }
+        }
+        return Task.CompletedTask;
+    }
+
     public bool IsUpload(IFormFileCollection formFiles)
     {
         return formFiles != null && formFiles?.Count > 0;
@@ -45,30 +60,22 @@ public class UploadFileService : IUploadFileService
         foreach (var file in formFiles)
         {
             if (!ValidationExtension(file.FileName))
-            {
                 return "Invalid File Extension";
-            }
-
 
             if (!ValidationSize(file.Length))
-            {
                 return "The file is too large";
-            }
         }
         return null;
     }
 
     public bool ValidationExtension(string filename)
     {
-        string[] permittedExtensions = { ".jpg", ".png" };
+        string[] permittedExtensions = { ".jpg", ".png" , ".jpeg" };
         string extension = Path.GetExtension(filename).ToLowerInvariant();
 
 
         if (string.IsNullOrEmpty(extension) || !permittedExtensions.Contains(extension))
-        {
             return false;
-        };
-
 
         return true;
     }

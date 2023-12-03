@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BackendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class init1 : Migration
+    public partial class itin : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -65,24 +65,6 @@ namespace BackendAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CategoryLocations", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Locations",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Capacity = table.Column<int>(type: "int", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PlaceDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Locations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -192,13 +174,37 @@ namespace BackendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Locations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Capacity = table.Column<int>(type: "int", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlaceDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Locations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Locations_CategoryLocations_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "CategoryLocations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "locationImages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: false)
+                    LocationId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -216,11 +222,11 @@ namespace BackendAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "6ef74a43-390c-4c92-9028-3d6023b2bb3d", null, "Professor", "Professor" },
-                    { "a4e47548-0ad1-4b7e-9254-a33fe9e4c07c", null, "Outsider", "Outsider" },
-                    { "b43fc241-881a-4233-bc97-5d0b9180bcfb", null, "Student", "student" },
-                    { "d37a7d2a-e04d-43ee-86cc-a3d046eb9dce", null, "Approver", "Approver" },
-                    { "f0af4f0f-2157-41c4-9516-5370e3ed9805", null, "Administrator", "Administrator" }
+                    { "1a5aefe9-0a29-4013-a0b5-29b66a1614fd", null, "Approver", "Approver" },
+                    { "24cc009a-dde1-47f7-8362-44b402f0bd34", null, "Professor", "Professor" },
+                    { "5356b5b5-5f53-4e9e-8511-05e88838db65", null, "Outsider", "Outsider" },
+                    { "7379994e-9c4b-4af3-939f-d6057cc6a5ac", null, "Student", "student" },
+                    { "a9756bd2-eb65-4fbe-947d-6af830269837", null, "Administrator", "Administrator" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -266,6 +272,11 @@ namespace BackendAPI.Migrations
                 name: "IX_locationImages_LocationId",
                 table: "locationImages",
                 column: "LocationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Locations_CategoryId",
+                table: "Locations",
+                column: "CategoryId");
         }
 
         /// <inheritdoc />
@@ -287,9 +298,6 @@ namespace BackendAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CategoryLocations");
-
-            migrationBuilder.DropTable(
                 name: "locationImages");
 
             migrationBuilder.DropTable(
@@ -300,6 +308,9 @@ namespace BackendAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Locations");
+
+            migrationBuilder.DropTable(
+                name: "CategoryLocations");
         }
     }
 }

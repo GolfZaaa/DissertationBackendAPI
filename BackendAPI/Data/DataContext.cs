@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace BackendAPI.Data
@@ -19,6 +20,15 @@ namespace BackendAPI.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            builder.Entity<Location>(options =>
+            {
+                options.HasMany(a => a.locationImages).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+
+                options.HasOne(a => a.Category);
+            });
+
+
+            //builder.Entity<Location>().HasOne(a=>a.Category).WithMany(a=>a.Locations).OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<IdentityRole>()
             .HasData(
