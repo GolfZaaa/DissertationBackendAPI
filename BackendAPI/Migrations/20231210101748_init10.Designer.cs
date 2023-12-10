@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231202043156_itin")]
-    partial class itin
+    [Migration("20231210101748_init10")]
+    partial class init10
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,7 +168,117 @@ namespace BackendAPI.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("locationImages");
+                    b.ToTable("LocationImages");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.LoginAttempt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountTimeLogin")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateTimeLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoginAttempts");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReservationCarts");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("LocationsId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReservationCartId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TotalHour")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TotalPrice")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationsId");
+
+                    b.HasIndex("ReservationCartId");
+
+                    b.ToTable("ReservationCartItems");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.Reservations", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountPeople")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateTimeCreateReservations")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LocationsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StatusFinished")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationsId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("Reservations");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -200,31 +310,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7379994e-9c4b-4af3-939f-d6057cc6a5ac",
+                            Id = "d2442027-fd3c-4db9-9ef2-d0d495cc1535",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "24cc009a-dde1-47f7-8362-44b402f0bd34",
+                            Id = "5f3e9f50-bd13-4b22-b314-2efca61ddfce",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "5356b5b5-5f53-4e9e-8511-05e88838db65",
+                            Id = "670a1246-bfa1-4de2-884d-28dcbf1fce3a",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "1a5aefe9-0a29-4013-a0b5-29b66a1614fd",
+                            Id = "880ec371-e7f9-43d3-b1c0-a9d47f2f4f9f",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "a9756bd2-eb65-4fbe-947d-6af830269837",
+                            Id = "859452f1-cf01-4375-9a79-28ff71224a76",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -339,7 +449,7 @@ namespace BackendAPI.Migrations
             modelBuilder.Entity("BackendAPI.Models.Location", b =>
                 {
                     b.HasOne("BackendAPI.Models.CategoryLocations", "Category")
-                        .WithMany()
+                        .WithMany("Locations")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -353,6 +463,39 @@ namespace BackendAPI.Migrations
                         .WithMany("locationImages")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Location", "Locations")
+                        .WithMany()
+                        .HasForeignKey("LocationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BackendAPI.Models.ReservationCart", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ReservationCartId");
+
+                    b.Navigation("Locations");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.Reservations", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Location", "Locations")
+                        .WithMany()
+                        .HasForeignKey("LocationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BackendAPI.Models.ApplicationUser", "Users")
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Locations");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -406,9 +549,19 @@ namespace BackendAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.CategoryLocations", b =>
+                {
+                    b.Navigation("Locations");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.Location", b =>
                 {
                     b.Navigation("locationImages");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

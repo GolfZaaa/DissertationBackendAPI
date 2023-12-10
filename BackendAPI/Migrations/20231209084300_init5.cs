@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BackendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class itin : Migration
+    public partial class init5 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -65,6 +65,22 @@ namespace BackendAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CategoryLocations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LoginAttempts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DateTimeLogin = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CountTimeLogin = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LoginAttempts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -198,7 +214,7 @@ namespace BackendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "locationImages",
+                name: "LocationImages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -208,10 +224,42 @@ namespace BackendAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_locationImages", x => x.Id);
+                    table.PrimaryKey("PK_LocationImages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_locationImages_Locations_LocationId",
+                        name: "FK_LocationImages_Locations_LocationId",
                         column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reservations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DateTimeCreateReservations = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CountPeople = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    UsersId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    LocationsId = table.Column<int>(type: "int", nullable: false),
+                    StatusFinished = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reservations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reservations_AspNetUsers_UsersId",
+                        column: x => x.UsersId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reservations_Locations_LocationsId",
+                        column: x => x.LocationsId,
                         principalTable: "Locations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -222,11 +270,11 @@ namespace BackendAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "1a5aefe9-0a29-4013-a0b5-29b66a1614fd", null, "Approver", "Approver" },
-                    { "24cc009a-dde1-47f7-8362-44b402f0bd34", null, "Professor", "Professor" },
-                    { "5356b5b5-5f53-4e9e-8511-05e88838db65", null, "Outsider", "Outsider" },
-                    { "7379994e-9c4b-4af3-939f-d6057cc6a5ac", null, "Student", "student" },
-                    { "a9756bd2-eb65-4fbe-947d-6af830269837", null, "Administrator", "Administrator" }
+                    { "47206def-6aaa-4edc-a633-c328ba85574d", null, "Professor", "Professor" },
+                    { "93d2b19b-f9d2-4f1b-b3d0-db8348277fb6", null, "Administrator", "Administrator" },
+                    { "b0572dd2-f59a-4072-8518-b55baccef1da", null, "Student", "student" },
+                    { "d103b701-a347-40fb-805a-500da04eb49b", null, "Outsider", "Outsider" },
+                    { "d5b34fc0-6819-49de-a9d7-804e4e16c248", null, "Approver", "Approver" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -269,14 +317,24 @@ namespace BackendAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_locationImages_LocationId",
-                table: "locationImages",
+                name: "IX_LocationImages_LocationId",
+                table: "LocationImages",
                 column: "LocationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Locations_CategoryId",
                 table: "Locations",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_LocationsId",
+                table: "Reservations",
+                column: "LocationsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservations_UsersId",
+                table: "Reservations",
+                column: "UsersId");
         }
 
         /// <inheritdoc />
@@ -298,7 +356,13 @@ namespace BackendAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "locationImages");
+                name: "LocationImages");
+
+            migrationBuilder.DropTable(
+                name: "LoginAttempts");
+
+            migrationBuilder.DropTable(
+                name: "Reservations");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

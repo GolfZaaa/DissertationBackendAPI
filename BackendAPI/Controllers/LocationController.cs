@@ -21,7 +21,7 @@ public class LocationController : BaseApiController
         _locationService = locationService;
     }
 
-    [HttpPost("CreateLocation Service!")]
+    [HttpPost("CreateLocationService")]
     public async Task<IActionResult> CreateLocation([FromForm] LocationRequest dto)
     {
         var validator = new LocationRequestValidator();
@@ -36,13 +36,13 @@ public class LocationController : BaseApiController
         return HandleResult(await _locationService.CreateLocationAsync(dto));
     }
 
-    [HttpPost("Update Locations Service")]
+    [HttpPost("Update LocationsService")]
     public async Task<ActionResult> UpdateLocation([FromForm] LocationRequest dto)
     {
         return HandleResult(await _locationService.UpdateLocationAsync(dto));
     }
 
-    [HttpGet("GetLocationById")]
+    [HttpGet("GetLocationByIdSerivce")]
     public async Task<IActionResult> GetByIdAsync(int id)
     {
         var locationResult = await _locationService.GetByIdAsync(id);
@@ -50,21 +50,16 @@ public class LocationController : BaseApiController
         return Ok(locationResponse);
     }
 
-
-
-    [HttpGet("ShowLoaction Service!")]
+    [HttpGet("ShowLoactionService")]
     public async Task<ActionResult> ShowLocation()
     {
         return HandleResult(await _locationService.ShowLocationAsync());
     }
 
-    [HttpDelete("DeleteLocation Service!")]                                                                                                                                                                                                                                                                           
+    [HttpDelete("DeleteLocationService")]                                                                                                                                                                                                                                                                           
     public async Task<ActionResult> DeleteLocation(int id)
     {
        return HandleResult(await _locationService.DeleteLocationAsync(id));
     }
-
-
-
 
 }

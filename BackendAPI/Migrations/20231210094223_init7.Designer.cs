@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231210094223_init7")]
+    partial class init7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,24 +198,6 @@ namespace BackendAPI.Migrations
                     b.ToTable("LoginAttempts");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ReservationCarts");
-                });
-
             modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
                 {
                     b.Property<int>("Id")
@@ -221,23 +206,18 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LocationsId")
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReservationCartId")
+                    b.Property<int>("ReservationsId")
                         .HasColumnType("int");
-
-                    b.Property<double>("TotalHour")
-                        .HasColumnType("float");
 
                     b.Property<int>("TotalPrice")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationsId");
-
-                    b.HasIndex("ReservationCartId");
+                    b.HasIndex("ReservationsId");
 
                     b.ToTable("ReservationCartItems");
                 });
@@ -312,31 +292,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "99d67085-4d88-4b8f-a136-3bb07c3bde17",
+                            Id = "c0d9150f-ba24-4e90-9b94-74b7928a0b5c",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "5aa5998d-22de-420d-bd5c-c377fdd64cc6",
+                            Id = "60adb940-c233-4e0f-b078-9e6980e9262d",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "4392ce17-e96d-4374-b846-1bc06c22a278",
+                            Id = "51331157-c5b2-4131-ba85-642fccf50903",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "3623def2-e8b3-433e-b0b6-cd94123be89f",
+                            Id = "eb57028b-5e6a-4785-bed6-4e0cef351dd1",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "85a9e1f5-572e-4767-bd14-4bf94be71fec",
+                            Id = "478ff944-476a-40a2-a5e6-4528a2bc8dd3",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -467,29 +447,15 @@ namespace BackendAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
-                {
-                    b.HasOne("BackendAPI.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
                 {
-                    b.HasOne("BackendAPI.Models.Location", "Locations")
+                    b.HasOne("BackendAPI.Models.Reservations", "Reservations")
                         .WithMany()
-                        .HasForeignKey("LocationsId")
+                        .HasForeignKey("ReservationsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BackendAPI.Models.ReservationCart", null)
-                        .WithMany("Items")
-                        .HasForeignKey("ReservationCartId");
-
-                    b.Navigation("Locations");
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.Reservations", b =>
@@ -569,11 +535,6 @@ namespace BackendAPI.Migrations
             modelBuilder.Entity("BackendAPI.Models.Location", b =>
                 {
                     b.Navigation("locationImages");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
-                {
-                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231210101138_init9")]
+    partial class init9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -203,12 +206,7 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("ReservationCarts");
                 });
@@ -221,10 +219,10 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LocationsId")
+                    b.Property<int?>("ReservationCartId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReservationCartId")
+                    b.Property<int>("ReservationsId")
                         .HasColumnType("int");
 
                     b.Property<double>("TotalHour")
@@ -235,9 +233,9 @@ namespace BackendAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationsId");
-
                     b.HasIndex("ReservationCartId");
+
+                    b.HasIndex("ReservationsId");
 
                     b.ToTable("ReservationCartItems");
                 });
@@ -312,31 +310,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "99d67085-4d88-4b8f-a136-3bb07c3bde17",
+                            Id = "e75d2370-f585-4e64-84c0-d9cb3e065e6a",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "5aa5998d-22de-420d-bd5c-c377fdd64cc6",
+                            Id = "1e88dc7e-312e-4972-bcaf-8aa56cc56119",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "4392ce17-e96d-4374-b846-1bc06c22a278",
+                            Id = "5ce26254-12a3-4a48-9ebc-9b815202a51c",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "3623def2-e8b3-433e-b0b6-cd94123be89f",
+                            Id = "0e8e4f4f-196e-45ab-81e1-bf5d42f61774",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "85a9e1f5-572e-4767-bd14-4bf94be71fec",
+                            Id = "6c53a8a2-85b4-4e0a-84ca-4920b658dd9b",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -467,29 +465,19 @@ namespace BackendAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
-                {
-                    b.HasOne("BackendAPI.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
                 {
-                    b.HasOne("BackendAPI.Models.Location", "Locations")
-                        .WithMany()
-                        .HasForeignKey("LocationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("BackendAPI.Models.ReservationCart", null)
                         .WithMany("Items")
                         .HasForeignKey("ReservationCartId");
 
-                    b.Navigation("Locations");
+                    b.HasOne("BackendAPI.Models.Reservations", "Reservations")
+                        .WithMany()
+                        .HasForeignKey("ReservationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.Reservations", b =>

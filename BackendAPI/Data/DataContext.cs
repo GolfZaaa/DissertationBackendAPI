@@ -25,8 +25,15 @@ namespace BackendAPI.Data
                 options.HasMany(a => a.locationImages).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
 
                 options.HasOne(a => a.Category);
+
             });
 
+            builder.Entity<Reservations>(options =>
+            {
+                options.HasOne(a => a.Users).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+
+                options.HasOne(a => a.Locations).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+            });
 
             //builder.Entity<Location>().HasOne(a=>a.Category).WithMany(a=>a.Locations).OnDelete(DeleteBehavior.Cascade);
 
@@ -39,13 +46,25 @@ namespace BackendAPI.Data
                 new IdentityRole { Name = "Administrator", NormalizedName = "Administrator" }
             );
 
+            builder.Entity<ReservationCart>(options =>
+            {
+                options.HasOne(a=>a.User).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<ReservationCartItem>(options =>
+            {
+                options.HasOne(a => a.Locations).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
         // ตารางเช็ค Login ผิดเกิน 3 ครั้ง
-        //public DbSet<LoginAttempt> LoginAttempts { get; set; }
+        public DbSet<LoginAttempt> LoginAttempts { get; set; }
         public DbSet<CategoryLocations> CategoryLocations { get; set; }
         public DbSet<Location> Locations { get; set; }
-        public DbSet<LocationImages> locationImages { get; set; }
+        public DbSet<LocationImages> LocationImages { get; set; }
+        public DbSet<Reservations> Reservations { get; set; }
+        public DbSet<ReservationCartItem> ReservationCartItems { get; set; }
+        public DbSet<ReservationCart> ReservationCarts { get; set; }
 
 
     }

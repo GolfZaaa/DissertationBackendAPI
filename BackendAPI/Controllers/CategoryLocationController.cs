@@ -23,13 +23,13 @@ namespace BackendAPI.Controllers
             _categoryLocationService = categoryLocationService;
         }
 
-        [HttpGet("ShowCategoryAll Service!")]
+        [HttpGet("ShowCategoryAllService")]
         public async Task<IActionResult> ShowCategory()
         {
             return HandleResult(await _categoryLocationService.CategoryRoomallAsync());
         }
 
-        [HttpPost("CreateCategory Service!")]
+        [HttpPost("CreateCategoryService")]
         public async Task<IActionResult> CreateCategory(CreateCategoryDto dto)
         {
             var Create = new CreateCategoryDtoValidator();
@@ -44,20 +44,20 @@ namespace BackendAPI.Controllers
             return HandleResult(await _categoryLocationService.CreateCategoryAsync(dto));
         }
 
-        [HttpDelete("DeleteCategorys Service!")]
+        [HttpDelete("DeleteCategorysService")]
         public async Task<ActionResult> DeleteCategorys(int id)
         {
             return HandleResult(await _categoryLocationService.DeleteCategorysAsync(id));
         }
 
-        [HttpGet("GetCategory Using Location")]
+        [HttpGet("GetCategoryUsingLocation")]
         public async Task<ActionResult> GetCategory()
         {
             var result = await _dataContext.Locations.GroupBy(x => x.Category).Select(a => a.Key).ToArrayAsync();
             return Ok(result);
         }
 
-        [HttpPut("UpdateCategory Service!")]
+        [HttpPut("UpdateCategoryService")]
         public async Task<ActionResult> UpdateCategory(UpdateCategoryDto dto)
         {
             var Create = new UpdateCategoryDtoValidator();

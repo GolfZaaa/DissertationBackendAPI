@@ -112,7 +112,7 @@ public class LocationService : ILocationService
 
     public async Task<Result<List<Location>>> ShowLocationAsync()
     {
-        var result = await _dataContext.Locations.Include(a=>a.locationImages).OrderByDescending(x=>x.Id).ToListAsync();
+        var result = await _dataContext.Locations.Include(x=>x.Category).Include(a=>a.locationImages).OrderByDescending(x=>x.Id).ToListAsync();
         if (result == null || result.Count == 0)
         {
             return Result<List<Location>>.Failure("Notfound Location");

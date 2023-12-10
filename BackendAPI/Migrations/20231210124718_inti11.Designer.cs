@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231210124718_inti11")]
+    partial class inti11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -312,31 +315,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "99d67085-4d88-4b8f-a136-3bb07c3bde17",
+                            Id = "7037d6f8-d4f5-45e0-8119-0df8b7dbd550",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "5aa5998d-22de-420d-bd5c-c377fdd64cc6",
+                            Id = "3022a043-1667-4589-9d5e-454d4facf65e",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "4392ce17-e96d-4374-b846-1bc06c22a278",
+                            Id = "f9f802ab-ac04-429a-ad44-d11e11c25183",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "3623def2-e8b3-433e-b0b6-cd94123be89f",
+                            Id = "465d4a08-af8f-4ac6-9e05-116e0b0c673b",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "85a9e1f5-572e-4767-bd14-4bf94be71fec",
+                            Id = "03772573-43e5-4532-8e06-e756a56f66a1",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -471,8 +474,7 @@ namespace BackendAPI.Migrations
                 {
                     b.HasOne("BackendAPI.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });

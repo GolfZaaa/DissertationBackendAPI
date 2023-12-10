@@ -61,82 +61,82 @@ namespace BackendAPI.Services
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
 
-            if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
-                return Result<object>.Failure("Invalid username or password. Please try again.");
+            //if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+            //    return Result<object>.Failure("Invalid username or password. Please try again.");
 
             //เช็ค UserLogin ผิดเกิน 3 ครั้ง
-            //if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
-            //{
-            //    var loginAttempts = _dataContext.LoginAttempts.Where(x => x.UserName == loginDto.Username).ToList();
+            if (!await _userManager.CheckPasswordAsync(user, dto.Password))
+            {
+                var loginAttempts = _dataContext.LoginAttempts.Where(x => x.UserName == dto.Username).ToList();
 
-            //    if (loginAttempts.Count == 0)
-            //    {
-            //        var newLoginAttempt = new LoginAttempt
-            //        {
-            //            UserId = user.Id,
-            //            UserName = loginDto.Username,
-            //            DateTimeLogin = DateTime.Now,
-            //            CountTimeLogin = 1
-            //        };
-            //        user.AccessFailedCount = 1;
-            //        _dataContext.Add(newLoginAttempt);
-            //        _dataContext.SaveChanges();
+                if (loginAttempts.Count == 0)
+                {
+                    var newLoginAttempt = new LoginAttempt
+                    {
+                        UserId = user.Id,
+                        UserName = dto.Username,
+                        DateTimeLogin = DateTime.Now,
+                        CountTimeLogin = 1
+                    };
+                    user.AccessFailedCount = 1;
+                    _dataContext.Add(newLoginAttempt);
+                    _dataContext.SaveChanges();
 
-            //        return HandleResult(Result<string>.Failure("Failed to login. You have 2 more attempts."));
-            //    }
-            //    else if (loginAttempts.Count == 1)
-            //    {
-            //        var newLoginAttempt = new LoginAttempt
-            //        {
-            //            UserId = user.Id,
-            //            UserName = loginDto.Username,
-            //            DateTimeLogin = DateTime.Now,
-            //            CountTimeLogin = 2
-            //        };
-            //        user.AccessFailedCount = 2;
-            //        _dataContext.Add(newLoginAttempt);
-            //        _dataContext.SaveChanges();
+                    return Result<object>.Failure("Failed to login. You have 2 more attempts.");
+                }
+                else if (loginAttempts.Count == 1)
+                {
+                    var newLoginAttempt = new LoginAttempt
+                    {
+                        UserId = user.Id,
+                        UserName = dto.Username,
+                        DateTimeLogin = DateTime.Now,
+                        CountTimeLogin = 2
+                    };
+                    user.AccessFailedCount = 2;
+                    _dataContext.Add(newLoginAttempt);
+                    _dataContext.SaveChanges();
 
-            //        return HandleResult(Result<string>.Failure("Failed to login. You have 1 more attempt."));
-            //    }
-            //    else if (loginAttempts.Count == 2)
-            //    {
-            //        var newLoginAttempt = new LoginAttempt
-            //        {
-            //            UserId = user.Id,
-            //            UserName = loginDto.Username,
-            //            DateTimeLogin = DateTime.Now,
-            //            CountTimeLogin = 3
-            //        };
-            //        user.AccessFailedCount = 3;
-            //        _dataContext.Add(newLoginAttempt);
-            //        _dataContext.SaveChanges();
-            //        return HandleResult(Result<string>.Failure("Your account is temporarily blocked. Please login again after 1 day."));
-            //    }
-            //    else if (loginAttempts.Count == 3)
-            //    {
-            //        var test = loginAttempts.Last();
+                    return Result<object>.Failure("Failed to login. You have 1 more attempt.");
+                }
+                else if (loginAttempts.Count == 2)
+                {
+                    var newLoginAttempt = new LoginAttempt
+                    {
+                        UserId = user.Id,
+                        UserName = dto.Username,
+                        DateTimeLogin = DateTime.Now,
+                        CountTimeLogin = 3
+                    };
+                    user.AccessFailedCount = 3;
+                    _dataContext.Add(newLoginAttempt);
+                    _dataContext.SaveChanges();
+                    return Result<object>.Failure("Your account is temporarily blocked. Please login again after 10 Seconds.");
+                }
+                else if (loginAttempts.Count == 3)
+                {
+                    var test = loginAttempts.Last();
 
-            //        if (DateTime.Now - test.DateTimeLogin >= TimeSpan.FromMinutes(1))
-            //        {
-            //            _dataContext.RemoveRange(loginAttempts);
-            //            _dataContext.SaveChanges();
+                    if (DateTime.Now - test.DateTimeLogin >= TimeSpan.FromSeconds(10))
+                    {
+                        _dataContext.RemoveRange(loginAttempts);
+                        _dataContext.SaveChanges();
 
-            //            var newLoginAttempt = new LoginAttempt
-            //            {
-            //                UserId = user.Id,
-            //                UserName = loginDto.Username,
-            //                DateTimeLogin = DateTime.Now,
-            //                CountTimeLogin = 1
-            //            };
-            //            user.AccessFailedCount = 1;
-            //            _dataContext.Add(newLoginAttempt);
-            //            _dataContext.SaveChanges();
-            //            return HandleResult(Result<string>.Failure("Failed to login. You have 1 more attempt."));
-            //        }
-            //        return HandleResult(Result<string>.Failure("Your account is temporarily blocked. Please login again after 5 minute."));
-            //    }
-            //}
+                        var newLoginAttempt = new LoginAttempt
+                        {
+                            UserId = user.Id,
+                            UserName = dto.Username,
+                            DateTimeLogin = DateTime.Now,
+                            CountTimeLogin = 1
+                        };
+                        user.AccessFailedCount = 1;
+                        _dataContext.Add(newLoginAttempt);
+                        _dataContext.SaveChanges();
+                        return Result<object>.Failure("Failed to login. You have 2 more attempt.");
+                    }
+                    return Result<object>.Failure("Your account is temporarily blocked. Please login again after 10 Seconds.");
+                }
+            }
 
             if (!user.EmailConfirmed)return Result<object>.Failure("Please confirm your email for the first login.");
 
@@ -285,7 +285,7 @@ namespace BackendAPI.Services
             if (user.UserName == dto.NewUserName)
                 return Result<string>.Failure("The new UserName is the same as the current UserName you are using. Please enter a UserName that is different from the current one.");
 
-            if(!UserNameFormatValid(dto.UserName))return Result<string>.Failure("Invalid format for the new UserName.");
+            if(!UserNameFormatValid(dto.UserName))return Result<string>.Failure("Invalid format for the new UserName: At least 7 characters long and 1 capital letter  .");
             
 
             var result = await _userManager.SetUserNameAsync(user, dto.NewUserName);
@@ -297,7 +297,7 @@ namespace BackendAPI.Services
             
         private bool UserNameFormatValid(string userName)
         {
-            return userName.Length >= 10 && Regex.IsMatch(userName, "^[a-zA-Z0-9]+$");
+            return userName.Length >= 1 && Regex.IsMatch(userName, "^[A-Z]+$");
         }
 
         public async Task<Result<string>> ConfirmEmailUserAsync(ConfirmEmailUserDto dto)
