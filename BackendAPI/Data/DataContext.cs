@@ -28,12 +28,13 @@ namespace BackendAPI.Data
 
             });
 
-            builder.Entity<Reservations>(options =>
-            {
-                options.HasOne(a => a.Users).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+            //builder.Entity<ReservationsOrder>(options =>
+            //{
+            //    //options.HasOne(a => a.Users).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
 
-                options.HasOne(a => a.Locations).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
-            });
+
+            //    //options.HasOne(a => a.Locations).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+            //});
 
             //builder.Entity<Location>().HasOne(a=>a.Category).WithMany(a=>a.Locations).OnDelete(DeleteBehavior.Cascade);
 
@@ -46,14 +47,15 @@ namespace BackendAPI.Data
                 new IdentityRole { Name = "Administrator", NormalizedName = "Administrator" }
             );
 
-            builder.Entity<ReservationCart>(options =>
+            builder.Entity<Cart>(options =>
             {
                 options.HasOne(a=>a.User).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
             });
 
-            builder.Entity<ReservationCartItem>(options =>
+            builder.Entity<CartItem>(options =>
             {
                 options.HasOne(a => a.Locations).GetInfrastructure().OnDelete(DeleteBehavior.Cascade);
+
             });
         }
 
@@ -62,9 +64,10 @@ namespace BackendAPI.Data
         public DbSet<CategoryLocations> CategoryLocations { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<LocationImages> LocationImages { get; set; }
-        public DbSet<Reservations> Reservations { get; set; }
-        public DbSet<ReservationCartItem> ReservationCartItems { get; set; }
-        public DbSet<ReservationCart> ReservationCarts { get; set; }
+        public DbSet<ReservationsOrder> ReservationsOrders { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<ReservationsOrderItem> ReservationsOrderItems { get; set; }
 
 
     }

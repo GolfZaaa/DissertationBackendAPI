@@ -87,6 +87,59 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Carts");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.CartItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CountPeople")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LocationsId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("TotalHour")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CartId");
+
+                    b.HasIndex("LocationsId");
+
+                    b.ToTable("CartItems");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.CategoryLocations", b =>
                 {
                     b.Property<int>("Id")
@@ -195,7 +248,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("LoginAttempts");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
+            modelBuilder.Entity("BackendAPI.Models.ReservationsOrder", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -203,84 +256,53 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ReservationCarts");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("LocationsId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ReservationCartId")
-                        .HasColumnType("int");
-
-                    b.Property<double>("TotalHour")
-                        .HasColumnType("float");
-
-                    b.Property<int>("TotalPrice")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationsId");
-
-                    b.HasIndex("ReservationCartId");
-
-                    b.ToTable("ReservationCartItems");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.Reservations", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CountPeople")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DateTimeCreateReservations")
+                    b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StatusFinished")
+                        .HasColumnType("int");
+
+                    b.Property<long>("TotalAmount")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReservationsOrders");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ReservationsOrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LocationsId")
+                    b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Price")
+                    b.Property<long>("Price")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ReservationsOrderId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("StatusFinished")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UsersId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationsId");
+                    b.HasIndex("LocationId");
 
-                    b.HasIndex("UsersId");
+                    b.HasIndex("ReservationsOrderId");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("ReservationsOrderItems");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -312,31 +334,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "99d67085-4d88-4b8f-a136-3bb07c3bde17",
+                            Id = "b70f0735-92f7-47f5-9c31-2aa680aff33f",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "5aa5998d-22de-420d-bd5c-c377fdd64cc6",
+                            Id = "5be4e65f-6f5d-4620-89c6-294cb1c7a970",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "4392ce17-e96d-4374-b846-1bc06c22a278",
+                            Id = "7c487eb8-5c5a-4156-a64f-936186d88885",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "3623def2-e8b3-433e-b0b6-cd94123be89f",
+                            Id = "8dc1e5b8-f356-4801-9ca7-eef57d39910f",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "85a9e1f5-572e-4767-bd14-4bf94be71fec",
+                            Id = "207cc268-4c1d-48d2-a924-e79ca1cc75f6",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
@@ -448,6 +470,31 @@ namespace BackendAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.Cart", b =>
+                {
+                    b.HasOne("BackendAPI.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.CartItem", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Cart", null)
+                        .WithMany("Items")
+                        .HasForeignKey("CartId");
+
+                    b.HasOne("BackendAPI.Models.Location", "Locations")
+                        .WithMany()
+                        .HasForeignKey("LocationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Locations");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.Location", b =>
                 {
                     b.HasOne("BackendAPI.Models.CategoryLocations", "Category")
@@ -467,47 +514,23 @@ namespace BackendAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
+            modelBuilder.Entity("BackendAPI.Models.ReservationsOrderItem", b =>
                 {
-                    b.HasOne("BackendAPI.Models.ApplicationUser", "User")
+                    b.HasOne("BackendAPI.Models.Location", "Location")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.ReservationCartItem", b =>
-                {
-                    b.HasOne("BackendAPI.Models.Location", "Locations")
-                        .WithMany()
-                        .HasForeignKey("LocationsId")
+                        .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BackendAPI.Models.ReservationCart", null)
-                        .WithMany("Items")
-                        .HasForeignKey("ReservationCartId");
-
-                    b.Navigation("Locations");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.Reservations", b =>
-                {
-                    b.HasOne("BackendAPI.Models.Location", "Locations")
-                        .WithMany()
-                        .HasForeignKey("LocationsId")
+                    b.HasOne("BackendAPI.Models.ReservationsOrder", "ReservationsOrder")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ReservationsOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BackendAPI.Models.ApplicationUser", "Users")
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.Navigation("Location");
 
-                    b.Navigation("Locations");
-
-                    b.Navigation("Users");
+                    b.Navigation("ReservationsOrder");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -561,6 +584,11 @@ namespace BackendAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.Cart", b =>
+                {
+                    b.Navigation("Items");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.CategoryLocations", b =>
                 {
                     b.Navigation("Locations");
@@ -571,9 +599,9 @@ namespace BackendAPI.Migrations
                     b.Navigation("locationImages");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.ReservationCart", b =>
+            modelBuilder.Entity("BackendAPI.Models.ReservationsOrder", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("OrderItems");
                 });
 #pragma warning restore 612, 618
         }
