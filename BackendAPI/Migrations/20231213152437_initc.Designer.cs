@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231213152437_initc")]
+    partial class initc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -285,6 +288,9 @@ namespace BackendAPI.Migrations
                     b.Property<int>("StatusFinished")
                         .HasColumnType("int");
 
+                    b.Property<long>("TotalAmount")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
                     b.ToTable("ReservationsOrders");
@@ -351,31 +357,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "769527f4-a2d6-4ce8-8bb4-5a31f2682c61",
+                            Id = "7bd23eed-018d-41e8-be15-a5204380ddf4",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "c89818ac-4009-4bbf-b9ef-a1f6b7be41dc",
+                            Id = "9fdba49d-f564-436b-822d-4e797c3a7836",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "5972b758-c204-41b3-b104-358e266060f6",
+                            Id = "7dab1c76-9340-4c38-b641-50d4e11f17e6",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "6c2c7a2a-842c-4153-ad52-706c8201c9e6",
+                            Id = "072e6b5f-8ec6-49e7-8f0d-f221ed19d94d",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "ff1fdc5f-a415-4d85-9c58-cd0faa04607e",
+                            Id = "4ac46287-bb3b-4d2c-ac76-e3d33ce213eb",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });

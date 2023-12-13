@@ -68,7 +68,7 @@ namespace BackendAPI.Data
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<ReservationsOrderItem> ReservationsOrderItems { get; set; }
-
+        public DbSet<Agency> Agencys { get; set; }
 
     }
 

@@ -31,74 +31,74 @@ namespace BackendAPI.Controllers
 
 
 
-        [HttpPost("CreateReservations AddToCart")]
-        public async Task<ActionResult> CreateReservations(ReservationsDto dto)
-        {
-            var user = await _dataContext.Users.FindAsync(dto.UserId);
+        //[HttpPost("CreateReservations AddToCart")]
+        //public async Task<ActionResult> CreateReservations(ReservationsDto dto)
+        //{
+        //    var user = await _dataContext.Users.FindAsync(dto.UserId);
 
-            //if (user == null)
-            //    return HandleResult(Result<string>.Failure("User not found"));
+        //    //if (user == null)
+        //    //    return HandleResult(Result<string>.Failure("User not found"));
 
-            var location = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(l => l.Id == dto.LocationId);
+        //    var location = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(l => l.Id == dto.LocationId);
 
-            if (location == null)
-                return HandleResult(Result<string>.Failure("Location not found"));
+        //    if (location == null)
+        //        return HandleResult(Result<string>.Failure("Location not found"));
 
-            if (dto.CountPeople > location.Capacity)
-            {
-                return HandleResult(Result<string>.Failure("The number of people booking exceeds the room capacity."));
-            }
+        //    if (dto.CountPeople > location.Capacity)
+        //    {
+        //        return HandleResult(Result<string>.Failure("The number of people booking exceeds the room capacity."));
+        //    }
 
-            if (location.Status == 0)
-            {
-                return HandleResult(Result<string>.Failure("The room is not available"));
-            }
+        //    if (location.Status == 0)
+        //    {
+        //        return HandleResult(Result<string>.Failure("The room is not available"));
+        //    }
 
-            // การเพิ่มข้อมูลจองลงในตะกร้า
+        //    // การเพิ่มข้อมูลจองลงในตะกร้า
 
-            var reservationCartItem = new CartItem
-            {
-                Locations = location,
-                StartTime = dto.StartTime,
-                EndTime = dto.EndTime,
-                CountPeople = dto.CountPeople,
-            };
+        //    var reservationCartItem = new CartItem
+        //    {
+        //        Locations = location,
+        //        StartTime = dto.StartTime,
+        //        EndTime = dto.EndTime,
+        //        CountPeople = dto.CountPeople,
+        //    };
 
-            location.Status = 0;
+        //    location.Status = 0;
 
-            TimeSpan totalHours = reservationCartItem.EndTime - reservationCartItem.StartTime;
-            double totalHoursValue = totalHours.TotalHours;
+        //    TimeSpan totalHours = reservationCartItem.EndTime - reservationCartItem.StartTime;
+        //    double totalHoursValue = totalHours.TotalHours;
 
-            // หากต้องการให้ผลลัพธ์เป็นจำนวนชั่วโมงทั้งหมดที่เป็นจำนวนเต็ม
-            int totalRoundedHours = (int)Math.Round(totalHoursValue);
+        //    // หากต้องการให้ผลลัพธ์เป็นจำนวนชั่วโมงทั้งหมดที่เป็นจำนวนเต็ม
+        //    int totalRoundedHours = (int)Math.Round(totalHoursValue);
 
-            //_dataContext.Reservations.Add(reservation);
-            await _dataContext.SaveChangesAsync();
-
-
-
-            // ดึงข้อมูลผู้ใช้และตะกร้าจากฐานข้อมูล
-            var cart = await _dataContext.Carts
-                .Include(c => c.Items)
-                .FirstOrDefaultAsync(c => c.User.Id == user.Id);
-
-            // หากไม่มีตะกร้า ให้สร้างตะกร้าใหม่
-            if (cart == null)
-            {
-                cart = new Cart
-                {
-                    User = user,
-                };
-                _dataContext.Carts.Add(cart);
-            }
-
-            // เพิ่ม ReservationCartItem ลงในตะกร้า
-            cart.Items.Add(reservationCartItem);
-            await _dataContext.SaveChangesAsync();
+        //    //_dataContext.Reservations.Add(reservation);
+        //    await _dataContext.SaveChangesAsync();
 
 
-            return HandleResult(Result<string>.Success("Add To Cart Success"));
-        }
+
+        //    // ดึงข้อมูลผู้ใช้และตะกร้าจากฐานข้อมูล
+        //    var cart = await _dataContext.Carts
+        //        .Include(c => c.Items)
+        //        .FirstOrDefaultAsync(c => c.User.Id == user.Id);
+
+        //    // หากไม่มีตะกร้า ให้สร้างตะกร้าใหม่
+        //    if (cart == null)
+        //    {
+        //        cart = new Cart
+        //        {
+        //            User = user,
+        //        };
+        //        _dataContext.Carts.Add(cart);
+        //    }
+
+        //    // เพิ่ม ReservationCartItem ลงในตะกร้า
+        //    cart.Items.Add(reservationCartItem);
+        //    await _dataContext.SaveChangesAsync();
+
+
+        //    return HandleResult(Result<string>.Success("Add To Cart Success"));
+        //}
 
 
 
@@ -114,22 +114,26 @@ namespace BackendAPI.Controllers
                 return HandleResult(Result<string>.Failure("User not found"));
             }
 
+            var locationstatus = await _dataContext.Carts.Where(x => x.User.Id == dto.userId)
+                .SelectMany(x => x.Items).Where(x => x.Locations.Id == dto.LocationId)
+                .Select(x => x.Locations.Id).FirstOrDefaultAsync();
+
+            if(locationstatus !=0)
+            {
+                return HandleResult(Result<string>.Failure("LocationId is already in the cart"));
+            }
+
             var location = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(l => l.Id == dto.LocationId);
 
             if (location == null)
                 return HandleResult(Result<string>.Failure("Location not found"));
-
-            if (dto.CountPeople > location.Capacity)
-            {
-                return HandleResult(Result<string>.Failure("The number of people booking exceeds the room capacity."));
-            }
 
             if (location.Status == 0)
             {
                 return HandleResult(Result<string>.Failure("The room is not available"));
             }
 
-            location.Status = 0;
+            //location.Status = 0;
 
             var shopCart = _dataContext.Carts.FirstOrDefault(x => x.User.Id == dto.userId);
             if (shopCart == null)
@@ -368,6 +372,7 @@ namespace BackendAPI.Controllers
         //}
 
         //private string GenerateID() => Guid.NewGuid().ToString("N");
+
 
 
 

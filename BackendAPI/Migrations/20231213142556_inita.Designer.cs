@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231210195604_inti3")]
-    partial class inti3
+    [Migration("20231213142556_inita")]
+    partial class inita
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,26 @@ namespace BackendAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BackendAPI.Models.Agency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Agencys");
+                });
 
             modelBuilder.Entity("BackendAPI.Models.ApplicationUser", b =>
                 {
@@ -130,9 +150,6 @@ namespace BackendAPI.Migrations
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<double>("TotalHour")
-                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -337,31 +354,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b70f0735-92f7-47f5-9c31-2aa680aff33f",
+                            Id = "2b51f6bf-f11f-48a0-bae0-732cfd1da714",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "5be4e65f-6f5d-4620-89c6-294cb1c7a970",
+                            Id = "b81cf213-c94a-4940-8a63-9752879f80b5",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "7c487eb8-5c5a-4156-a64f-936186d88885",
+                            Id = "171b88f2-b27c-45e8-8636-1d6172c94667",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "8dc1e5b8-f356-4801-9ca7-eef57d39910f",
+                            Id = "c7ee643f-d0ae-4761-a215-f9f86f0b29ad",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "207cc268-4c1d-48d2-a924-e79ca1cc75f6",
+                            Id = "943e981e-8f97-4541-8379-2cdd4ab9f8e6",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });

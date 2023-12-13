@@ -1,4 +1,5 @@
-﻿using Stripe;
+﻿using BackendAPI.DTOs.OrderDtos;
+using Stripe;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -19,10 +20,10 @@ public class ReservationsOrder
     public string? OrderImage { get; set; }
     public DateTime OrderDate { get; set; }
 
-    public long TotalAmount { get; set; }
-
     [JsonIgnore]
     public List<ReservationsOrderItem> OrderItems { get; set; } = new List<ReservationsOrderItem>();
     public int StatusFinished { get; set; }
+    public OrderStatus OrderStatus { get; set; }
+
 
 }

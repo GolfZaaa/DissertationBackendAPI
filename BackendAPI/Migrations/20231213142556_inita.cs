@@ -8,11 +8,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BackendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class inti3 : Migration
+    public partial class inita : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Agencys",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Agencys", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -258,7 +272,6 @@ namespace BackendAPI.Migrations
                     StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CountPeople = table.Column<int>(type: "int", nullable: false),
-                    TotalHour = table.Column<double>(type: "float", nullable: false),
                     CartId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -331,11 +344,11 @@ namespace BackendAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "207cc268-4c1d-48d2-a924-e79ca1cc75f6", null, "Administrator", "Administrator" },
-                    { "5be4e65f-6f5d-4620-89c6-294cb1c7a970", null, "Professor", "Professor" },
-                    { "7c487eb8-5c5a-4156-a64f-936186d88885", null, "Outsider", "Outsider" },
-                    { "8dc1e5b8-f356-4801-9ca7-eef57d39910f", null, "Approver", "Approver" },
-                    { "b70f0735-92f7-47f5-9c31-2aa680aff33f", null, "Student", "student" }
+                    { "171b88f2-b27c-45e8-8636-1d6172c94667", null, "Outsider", "Outsider" },
+                    { "2b51f6bf-f11f-48a0-bae0-732cfd1da714", null, "Student", "student" },
+                    { "943e981e-8f97-4541-8379-2cdd4ab9f8e6", null, "Administrator", "Administrator" },
+                    { "b81cf213-c94a-4940-8a63-9752879f80b5", null, "Professor", "Professor" },
+                    { "c7ee643f-d0ae-4761-a215-f9f86f0b29ad", null, "Approver", "Approver" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -416,6 +429,9 @@ namespace BackendAPI.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Agencys");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
