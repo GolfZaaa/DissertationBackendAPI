@@ -7,6 +7,7 @@
         public DateTime EndTime { get; set; }
         public int CountPeople { get; set; }
         public string userId { get; set; }
+        public string Objectives { get; set; }
 
     }
 }

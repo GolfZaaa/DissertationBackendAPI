@@ -16,5 +16,7 @@ namespace BackendAPI.Models
         public int ReservationsOrderId { get; set; }
         [JsonIgnore]
         public ReservationsOrder ReservationsOrder { get; set; }
+        public int StatusFinished { get; set; }
+
     }
 }

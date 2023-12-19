@@ -143,7 +143,7 @@ namespace BackendAPI.Controllers
                 await _dataContext.SaveChangesAsync();
                 shopCart = cart;
             }
-            shopCart.AddItem(location, dto.CountPeople,dto.StartTime, dto.EndTime);
+            shopCart.AddItem(location, dto.CountPeople,dto.StartTime, dto.EndTime,dto.Objectives);
             try
             {
                 await _dataContext.SaveChangesAsync();

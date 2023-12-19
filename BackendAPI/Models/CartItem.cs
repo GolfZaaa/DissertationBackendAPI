@@ -11,6 +11,7 @@ public class CartItem
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public int CountPeople { get; set; }
+    public string Objectives { get; set; }
 
 }
 

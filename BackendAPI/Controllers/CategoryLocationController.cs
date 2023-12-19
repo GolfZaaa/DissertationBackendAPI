@@ -30,7 +30,7 @@ namespace BackendAPI.Controllers
         }
 
         [HttpPost("CreateCategoryService")]
-        public async Task<IActionResult> CreateCategory(CreateCategoryDto dto)
+        public async Task<IActionResult> CreateCategory([FromForm]CreateCategoryDto dto)
         {
             var Create = new CreateCategoryDtoValidator();
             var result = Create.Validate(dto);

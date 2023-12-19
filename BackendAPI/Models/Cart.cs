@@ -6,7 +6,7 @@ public class Cart
     public ApplicationUser User { get; set; }
 
 
-    public void AddItem(Location location, int countPeople, DateTime startTime, DateTime endTime)
+    public void AddItem(Location location, int countPeople, DateTime startTime, DateTime endTime,string objectives)
     {
 
         //TimeSpan totalHours = endTime - startTime;
@@ -25,6 +25,7 @@ public class Cart
                 CountPeople = countPeople,
                 StartTime = startTime,
                 EndTime = endTime,
+                Objectives = objectives
             });
             }
         //รายการที่มีอยู่ ถ้ามีสินค้าในตะกร้าอยู่แล้วให้บวกจำนวนเพิ่มเข้าไป
@@ -34,7 +35,6 @@ public class Cart
             //existingItem.CountPeople += countPeople;
             TimeSpan durationToAdd = endTime - existingItem.EndTime;
             existingItem.EndTime = existingItem.EndTime.Add(durationToAdd);
-
         }
     }
 

@@ -22,7 +22,6 @@ public class ReservationsOrder
 
     [JsonIgnore]
     public List<ReservationsOrderItem> OrderItems { get; set; } = new List<ReservationsOrderItem>();
-    public int StatusFinished { get; set; }
     public OrderStatus OrderStatus { get; set; }
 
 

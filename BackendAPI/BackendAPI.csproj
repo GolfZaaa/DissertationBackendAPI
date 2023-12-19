@@ -32,6 +32,7 @@
     <Folder Include="Data\" />
     <Folder Include="wwwroot\LocationImages\" />
     <Folder Include="wwwroot\LocationImage\" />
+    <Folder Include="wwwroot\CategoryLocation\" />
   </ItemGroup>
 
 </Project>
