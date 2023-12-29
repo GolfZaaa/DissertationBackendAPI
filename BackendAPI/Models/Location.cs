@@ -12,5 +12,6 @@ namespace BackendAPI.Models
         public int Status { get; set; } = 1;
         public CategoryLocations Category { get; set; }
         public List<LocationImages> locationImages { get; set; } = new List<LocationImages>();
+        public int StatusOnOff { get; set; } = 1;
     }
 }

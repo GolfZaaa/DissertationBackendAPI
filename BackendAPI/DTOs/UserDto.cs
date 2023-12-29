@@ -6,6 +6,8 @@
         public string Email { get; set; }
         public string Token { get; set; }
         public string username { get; set; }
+        public IList<string> role { get; set; }
+
         //public string ProfileImage { get; set; }
     }
 }

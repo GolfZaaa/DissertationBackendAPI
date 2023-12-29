@@ -11,5 +11,7 @@ public class CategoryLocations
     public DateTime DateTimeCreate { get; set; }
     [JsonIgnore]
     public ICollection<Location> Locations { get; set; }
+    public int StatusOnOff { get; set; } = 1;
+
 }
 

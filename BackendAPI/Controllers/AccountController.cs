@@ -7,22 +7,30 @@ using BackendAPI.Response;
 using BackendAPI.Services;
 using BackendAPI.Services.IServices;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using SendGrid;
+using System.Security.Claims;
 
 namespace BackendAPI.Controllers;
 public class AccountController : BaseApiController
 {
     private readonly DataContext _dataContext;
     private readonly IAccountServices _accountServices;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AccountController(DataContext dataContext, IAccountServices accountServices)
+    public AccountController(DataContext dataContext, IAccountServices accountServices, UserManager<ApplicationUser> userManager,
+        IHttpContextAccessor httpContextAccessor)
     {
         _dataContext = dataContext;
         _accountServices = accountServices;
+        _userManager = userManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpGet("GetAllUserService")]
@@ -89,8 +97,33 @@ public class AccountController : BaseApiController
         return HandleResult(await _accountServices.DeleteAsync(dto));
     }
 
+    [HttpPost("AddProfileUser")]
+    public async Task<ActionResult> AddProfileUser(AddProfileUserDto dto)
+    {
+        var user = await _userManager.FindByIdAsync(dto.userId);
+        if(user == null)
+        {
+            return HandleResult(Result<string>.Failure("User Null."));
+        }
 
+        if (!string.IsNullOrEmpty(dto.firstName))
+        {
+            user.FirstName = dto.firstName;
+        }
 
+        if (!string.IsNullOrEmpty(dto.lastName))
+        {
+            user.LastName = dto.lastName;
+        }
+
+        if (!string.IsNullOrEmpty(dto.phoneNumber))
+        {
+            user.PhoneNumber = dto.phoneNumber;
+        }
+
+        await _dataContext.SaveChangesAsync();
+        return HandleResult(Result<string>.Success("UpdateSuccess"));
+    }
 
 
 }

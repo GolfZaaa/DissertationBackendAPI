@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -60,9 +61,6 @@ namespace BackendAPI.Services
         public async Task<Result<object>> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
-
-            //if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
-            //    return Result<object>.Failure("Invalid username or password. Please try again.");
 
             //เช็ค UserLogin ผิดเกิน 3 ครั้ง
             if (!await _userManager.CheckPasswordAsync(user, dto.Password))
@@ -141,16 +139,20 @@ namespace BackendAPI.Services
             if (!user.EmailConfirmed)return Result<object>.Failure("Please confirm your email for the first login.");
 
             var userId = await _userManager.GetUserIdAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
             var userDto = new UserDto
             {
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user),
                 username = dto.Username,
                 UserId = userId,
+                role = roles.ToArray(),
                 // ProfileImage = user.ProfileImage,
             };
             return Result<object>.Success(userDto);
         }
+
+
 
         public async Task<Result<object>> RegisterAsync(RegisterDto registerDto)
         {
@@ -284,8 +286,6 @@ namespace BackendAPI.Services
 
             if (user.UserName == dto.NewUserName)
                 return Result<string>.Failure("The new UserName is the same as the current UserName you are using. Please enter a UserName that is different from the current one.");
-
-            if(!UserNameFormatValid(dto.UserName))return Result<string>.Failure("Invalid format for the new UserName: At least 7 characters long and 1 capital letter  .");
             
 
             var result = await _userManager.SetUserNameAsync(user, dto.NewUserName);
@@ -295,11 +295,6 @@ namespace BackendAPI.Services
             return Result<string>.Success("Change UserName Successfully.");
         }
             
-        private bool UserNameFormatValid(string userName)
-        {
-            return userName.Length >= 1 && Regex.IsMatch(userName, "^[A-Z]+$");
-        }
-
         public async Task<Result<string>> ConfirmEmailUserAsync(ConfirmEmailUserDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);

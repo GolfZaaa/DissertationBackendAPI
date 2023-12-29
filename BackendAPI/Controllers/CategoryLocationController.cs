@@ -71,5 +71,21 @@ namespace BackendAPI.Controllers
 
             return HandleResult(await _categoryLocationService.UpdateCategoryAsync(dto));
         }
+
+        [HttpGet("GetCategoryById")]
+        public async Task<ActionResult> GetCategoryById (int id)
+        {
+            var result = await _dataContext.CategoryLocations.Include(x => x.Locations).FirstOrDefaultAsync(x => x.Id == id);
+            
+            if(result == null )
+            {
+                return HandleResult(Result<string>.Failure("NotFound Category"));
+            }
+
+            // ดึง Locations ที่มี Category เดียวกับ parameter
+            var locations = result.Locations;
+
+            return Ok(new { Category = result, Locations = locations });
+        }
     }
 }
