@@ -7,6 +7,10 @@
         public string Token { get; set; }
         public string username { get; set; }
         public IList<string> role { get; set; }
+        public string firstName { get; set; }
+        public string lastName { get; set; }
+        public string phoneNumber { get; set; }
+        public int AgencyId { get; set; }
 
         //public string ProfileImage { get; set; }
     }

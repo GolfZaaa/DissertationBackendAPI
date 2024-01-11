@@ -16,7 +16,6 @@ public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
     public CreateCategoryDtoValidator()
     {
         RuleFor(x => x.Name).NotEmpty().WithMessage("Name is empty");
-        RuleFor(x => x.DateTimeCreate).NotEmpty().WithMessage("DateTimeCreate is empty");
         RuleFor(x => x.Servicefees).NotEmpty().WithMessage("Servicefees is empty");
     }
 

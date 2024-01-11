@@ -80,5 +80,18 @@ namespace BackendAPI.Controllers
             await _dataContext.SaveChangesAsync();
             return HandleResult(Result<string>.Success($"Delete Agency Success"));
         }
+
+        [HttpGet("SearchAgencyById")]
+        public async Task<ActionResult> SearchAgencyById(int id)
+        {
+            var result = await _dataContext.Agencys.FirstOrDefaultAsync(x =>x.Id == id);
+
+            if(result == null)
+            {
+                return HandleResult(Result<string>.Failure("NotFound Agency"));
+            }
+
+            return HandleResult(Result<object>.Success(result));
+        }
     }
 }

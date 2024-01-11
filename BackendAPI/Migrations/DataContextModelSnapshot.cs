@@ -50,6 +50,9 @@ namespace BackendAPI.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -299,6 +302,9 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -307,6 +313,16 @@ namespace BackendAPI.Migrations
 
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("TotalPrice")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -377,31 +393,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "52ce4b3b-5111-4a1c-b269-ec557ca55247",
+                            Id = "7dbc7826-8801-4fbc-b0fd-57918fc2935d",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "78c0802c-a61c-4c2d-a83e-28b914613b49",
+                            Id = "5e7d64d9-8ace-4a6b-82ec-f256f2410715",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "8a70fb6f-db5e-4cb9-812c-3dbcba073d2c",
+                            Id = "2afe6cd6-4fe9-4cee-86f3-1a04cadb7bb9",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "af131ee9-248c-4ced-8d94-e7c1dc898a0a",
+                            Id = "68e04f4f-3795-45b6-8d22-b7f5a51a75f6",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "9cb8956d-e97e-47b8-ade4-d9081b257e72",
+                            Id = "403a2de4-e722-4a36-8063-eeba3f6d4242",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });

@@ -2,20 +2,32 @@
 using BackendAPI.Data;
 using BackendAPI.DTOs.OrderDtos;
 using BackendAPI.Models;
+using BackendAPI.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using Stripe;
+using Stripe.Climate;
 
 namespace BackendAPI.Controllers
 {
     public class OrderController : BaseApiController
     {
         private readonly DataContext _dataContext;
+        private readonly IConfiguration _configuration;
+        private readonly IUploadFileSingleService _uploadFileSingleService;
+        private readonly SendGridClient _sendGridClient;
 
-        public OrderController(DataContext dataContext)
+        public OrderController(DataContext dataContext,IConfiguration configuration,IUploadFileSingleService uploadFileSingleService, SendGridClient sendGridClient)
         {
             _dataContext = dataContext;
+            _configuration = configuration;
+            _uploadFileSingleService = uploadFileSingleService;
+            _sendGridClient = sendGridClient;
         }
+        public List<ReservationsOrderItem> OrderItems { get; set; } = new List<ReservationsOrderItem>();
 
         [HttpPost("CreateOrder")]
         public async Task<ActionResult> CreateOrder([FromForm]OrderDto dto)
@@ -33,7 +45,7 @@ namespace BackendAPI.Controllers
             var order = new ReservationsOrder
             {
                 OrderDate = DateTime.Now,
-                OrderStatus = OrderStatus.PendingApproval,
+                //OrderStatus = OrderStatus.PendingApproval,
             };
 
             foreach (var item in cart.Items)
@@ -184,10 +196,191 @@ namespace BackendAPI.Controllers
         [HttpGet("GetReservationsOrderItem")]
         public async Task<ActionResult> GetReservationsOrderItem()
         {
-            var result = await _dataContext.ReservationsOrderItems.ToListAsync();
+            var result = await _dataContext.ReservationsOrderItems.Include(x=>x.Location).ToListAsync();
 
             return HandleResult(Result<object>.Success(result));
         }
+
+
+        private async Task<(string errorMessge, string imageNames)> UploadImageMainAsync(IFormFile formfile)
+        {
+            var errorMessge = string.Empty;
+            var imageName = string.Empty;
+
+            if (_uploadFileSingleService.IsUpload(formfile))
+            {
+                errorMessge = _uploadFileSingleService.Validation(formfile);
+                if (errorMessge is null)
+                {
+                    imageName = await _uploadFileSingleService.UploadImages(formfile);
+                }
+            }
+
+            return (errorMessge, imageName);
+        }
+
+
+        private async Task<PaymentIntent> CreatePaymentIntent(ReservationsOrder order)
+        {
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+            var service = new PaymentIntentService();
+            var intent = new PaymentIntent();
+
+            //สร้างรายการใหม่
+            if (string.IsNullOrEmpty(order.PaymentIntentId))
+            {
+                var options = new PaymentIntentCreateOptions
+                {
+                    Amount = (long)order.TotalPrice * 100, // ยอดเงินเท่าไร
+                    Currency = "THB", // สกุลเงิน 
+                    PaymentMethodTypes = new List<string> { "card" } // วิธีการจ่าย
+                };
+                intent = await service.CreateAsync(options); // รหัสใบส่งของ
+            };
+
+            return intent; // ส่งใบส่งของออกไป
+        }
+
+
+        [HttpPost("CreateOrderByStripe")]
+        public async Task<ActionResult> CreateOrderByStripe([FromForm] OrderDto dto)
+        {
+            var checkuser = await _dataContext.Users.SingleOrDefaultAsync(x=>x.Id == dto.UserId);
+
+            if (checkuser == null)
+            {
+                return HandleResult(Result<string>.Failure("Not Found User"));
+            }
+            var cart = await RetrieveCart(dto.UserId);
+            if (cart == null)
+            {
+                return HandleResult(Result<string>.Failure("Cart not Found"));
+            }
+
+            var order = new ReservationsOrder
+            {
+                UserId = dto.UserId,
+                OrderDate = DateTime.Now,
+                OrderStatus = Models.OrderStatus.PendingApproval,
+            };
+
+
+
+            foreach (var item in cart.Items)
+            {
+
+                var locationtest = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == item.Locations.Id);
+
+                if (locationtest == null || locationtest.Category == null)
+                {
+                    return HandleResult(Result<string>.Failure("Location or Category Not Found"));
+                }
+
+                var price = locationtest.Category.Servicefees;
+
+                var orderItem = new ReservationsOrderItem
+                {
+                    LocationId = item.Locations.Id,
+                    Price = price,
+                    ReservationsOrder = order,
+                    StartTime = item.StartTime,
+                    EndTime = item.EndTime,
+                    StatusFinished = 1,
+                };
+                order.OrderItems.Add(orderItem);
+                //var location = await _dataContext.Locations.FirstOrDefaultAsync(a => a.Id == item.Locations.Id);
+                //if (location != null)
+                //{
+                //    product.QuantityInStock -= item.Amount;
+                //}
+            }
+            order.TotalPrice = order.GetTotalAmount();
+            _dataContext.ReservationsOrders.Add(order);
+
+            _dataContext.Carts.Remove(cart);
+            _dataContext.CartItems.RemoveRange(cart.Items);
+            await _dataContext.SaveChangesAsync();
+
+            if (dto.PaymentMethod == DTOs.OrderDtos.PaymentMethod.CreditCard)
+            {
+                var intent = await CreatePaymentIntent(order);
+                if (!string.IsNullOrEmpty(intent.Id))
+                {
+                    order.PaymentIntentId = intent.Id; // เอาใบส่งของใส่ในใบสั่งซื้อ
+                    order.ClientSecret = intent.ClientSecret; // เอารหัสลับใส่ในใบสั่งซื้อ
+                };
+            }
+            else
+            {
+                (string errorMessgeMain, string imageNames) =
+                await UploadImageMainAsync(dto.OrderImage);
+                order.OrderImage = imageNames;
+            }
+            await _dataContext.SaveChangesAsync();
+
+            var orderItemsHtml = "";
+
+            foreach (var item in order.OrderItems)
+            {
+                orderItemsHtml += $@"
+                    <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
+                        <p><strong>Location:</strong> {item.Location}</p>
+                        <p><strong>StartTime:</strong> {item.StartTime}</p>
+                        <p><strong>EndTime:</strong> {item.EndTime}</p>
+                        <p><strong>Price:</strong> {item.Price}</p>
+                    </div>";
+            }
+
+
+            var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
+            var to = new EmailAddress(checkuser.Email);
+            var subject = "Order Confirmation";
+            var htmlContent = $@"
+    <div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
+        <div style=""text-align: center;"">
+            <img src=""https://api.freelogodesign.org/assets/thumb/logo/a17b07eb64d341ffb1e09392aa3a1698_400.png"" alt=""Company Logo"" style=""max-width: 150px; margin-bottom: 20px;"">
+            <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
+            <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
+        </div>
+
+        <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+
+        <div style=""margin-bottom: 20px;"">
+            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Details</h3>
+            <p><strong>Order ID:</strong> {order.Id}</p>
+            <p><strong>Order Date:</strong> {order.OrderDate}</p>
+        </div>
+
+        <div style=""margin-bottom: 20px;"">
+            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Shipping Address</h3>
+            <p>{checkuser.FirstName}, {checkuser.LastName}, {checkuser.PhoneNumber}</p>
+        </div>
+
+        <div style=""margin-bottom: 20px;"">
+            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Items</h3>
+            {orderItemsHtml}
+        </div>
+
+        <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+
+        <div style=""text-align: right;"">
+            <p style=""font-size: 18px; color: #333;""><strong>Total Amount:</strong> {order.TotalPrice}</p>
+        </div>
+
+        <div style=""text-align: center; margin-top: 20px;"">
+            <p style=""font-size: 16px; color: #666;"">Thank you for your purchase!</p>
+          </div>
+            </div>";
+
+
+            var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
+            await _sendGridClient.SendEmailAsync(emailMessage);
+
+
+            return Ok(order);
+        }
+
+
 
     }
 }

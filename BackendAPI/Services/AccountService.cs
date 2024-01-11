@@ -142,17 +142,15 @@ namespace BackendAPI.Services
             var roles = await _userManager.GetRolesAsync(user);
             var userDto = new UserDto
             {
-                Email = user.Email,
                 Token = await _tokenService.GenerateToken(user),
-                username = dto.Username,
                 UserId = userId,
                 role = roles.ToArray(),
                 // ProfileImage = user.ProfileImage,
+
             };
             return Result<object>.Success(userDto);
+
         }
-
-
 
         public async Task<Result<object>> RegisterAsync(RegisterDto registerDto)
         {
@@ -167,6 +165,8 @@ namespace BackendAPI.Services
                 UserName = registerDto.Username,
                 Email = registerDto.Email,
                 EmailConfirmed = false,
+                FirstName = "",
+                LastName = "",
             };
 
             var result = await _userManager.CreateAsync(createuser, registerDto.Password);

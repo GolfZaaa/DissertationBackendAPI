@@ -172,6 +172,7 @@ namespace BackendAPI.Controllers
             var userCart = await _dataContext.Carts
                 .Include(c => c.Items)
                 .ThenInclude(i => i.Locations)
+                .ThenInclude(i => i.Category)
                 .Where(c => c.User.Id == userId)
                 .FirstOrDefaultAsync();
 

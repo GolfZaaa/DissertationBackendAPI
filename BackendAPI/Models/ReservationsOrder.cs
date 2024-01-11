@@ -17,12 +17,20 @@ public class ReservationsOrder
     //public int StatusFinished { get; set; }
     [Key]
     public int Id { get; set; }
+    public string UserId { get; set; }
     public string? OrderImage { get; set; }
+    public long TotalPrice { get; set; }
     public DateTime OrderDate { get; set; }
 
     [JsonIgnore]
     public List<ReservationsOrderItem> OrderItems { get; set; } = new List<ReservationsOrderItem>();
+    public string? PaymentIntentId { get; set; }
+    public string? ClientSecret { get; set; }
     public OrderStatus OrderStatus { get; set; }
 
+    public long GetTotalAmount()
+    {
+        return OrderItems.Sum(x => x.Price);
+    }
 
 }

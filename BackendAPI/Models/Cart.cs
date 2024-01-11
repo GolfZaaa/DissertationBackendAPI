@@ -9,12 +9,6 @@ public class Cart
     public void AddItem(Location location, int countPeople, DateTime startTime, DateTime endTime,string objectives)
     {
 
-        //TimeSpan totalHours = endTime - startTime;
-        //double totalHoursValue = totalHours.TotalHours;
-        //// หากต้องการให้ผลลัพธ์เป็นจำนวนชั่วโมงทั้งหมดที่เป็นจำนวนเต็ม
-        //int totalRoundedHours = (int)Math.Round(totalHoursValue);
-
-
         // ตรวจสอบโดยการ วนลูป ถ้าสินค้าที่ส่งมาไม่มีในตะกร้าให้เพิ่มเข้าไป
         if (Items.All(item => item.Locations.Id != location.Id))
         {

@@ -7,5 +7,6 @@ namespace BackendAPI.Models
         //public int ProfileImage { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public int AgencyId { get; set; }
     }
 }

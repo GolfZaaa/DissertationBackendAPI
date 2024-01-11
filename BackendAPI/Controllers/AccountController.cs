@@ -121,8 +121,26 @@ public class AccountController : BaseApiController
             user.PhoneNumber = dto.phoneNumber;
         }
 
+        if (dto.agencyId != null)
+        {
+            user.AgencyId = dto.agencyId;
+        }
+
         await _dataContext.SaveChangesAsync();
         return HandleResult(Result<string>.Success("UpdateSuccess"));
+    }
+
+    [HttpGet("SearchUserByUserId")]
+    public async Task<ActionResult> SearchUserByUserId(string userId)
+    {
+        var search = await _dataContext.Users.FirstOrDefaultAsync(x=>x.Id == userId);
+
+        if(search == null)
+        {
+            return HandleResult(Result<string>.Failure("Not Found User"));
+        }
+
+        return HandleResult(Result<object>.Success(search));
     }
 
 

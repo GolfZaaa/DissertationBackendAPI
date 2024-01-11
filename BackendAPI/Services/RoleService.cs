@@ -55,6 +55,7 @@ namespace BackendAPI.Services
 
             var usersWithRoles = roles.Select(x => new
             {
+                Id = x.Id,
                 Name = x.Name,
             }).ToList<object>();
             return Result<List<object>>.Success(usersWithRoles);
