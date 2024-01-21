@@ -143,5 +143,8 @@ public class AccountController : BaseApiController
         return HandleResult(Result<object>.Success(search));
     }
 
+    //[HttpGet("SearUserandAgencyByUserId")]
+    //public async Task<ActionResult> SearhUserandAgencyByUserId(string userId)
+
 
 }

@@ -114,14 +114,14 @@ namespace BackendAPI.Controllers
                 return HandleResult(Result<string>.Failure("User not found"));
             }
 
-            var locationstatus = await _dataContext.Carts.Where(x => x.User.Id == dto.userId)
-                .SelectMany(x => x.Items).Where(x => x.Locations.Id == dto.LocationId)
-                .Select(x => x.Locations.Id).FirstOrDefaultAsync();
+            //var locationstatus = await _dataContext.Carts.Where(x => x.User.Id == dto.userId)
+            //    .SelectMany(x => x.Items).Where(x => x.Locations.Id == dto.LocationId)
+            //    .Select(x => x.Locations.Id).FirstOrDefaultAsync();
 
-            if(locationstatus !=0)
-            {
-                return HandleResult(Result<string>.Failure("LocationId is already in the cart"));
-            }
+            //if(locationstatus !=0)
+            //{
+            //    return HandleResult(Result<string>.Failure("LocationId is already in the cart"));
+            //}
 
             var location = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(l => l.Id == dto.LocationId);
 
@@ -133,7 +133,20 @@ namespace BackendAPI.Controllers
                 return HandleResult(Result<string>.Failure("The room is not available"));
             }
 
-            //location.Status = 0;
+            var checkReservation = await _dataContext.ReservationsOrderItems
+                  .Where(x => x.LocationId == dto.LocationId && x.StatusFinished == 1 &&
+                ((dto.StartTime >= x.StartTime && dto.StartTime < x.EndTime) ||
+                 (dto.EndTime > x.StartTime && dto.EndTime <= x.EndTime) ||
+                 (x.StartTime >= dto.StartTime && x.StartTime < dto.EndTime) ||
+                 (x.EndTime > dto.StartTime && x.EndTime <= dto.EndTime)))
+                  .ToListAsync();
+
+
+
+            if (checkReservation.Any())
+            {
+                return HandleResult(Result<string>.Failure("The selected time is already booked."));
+            }
 
             var shopCart = _dataContext.Carts.FirstOrDefault(x => x.User.Id == dto.userId);
             if (shopCart == null)
@@ -143,6 +156,17 @@ namespace BackendAPI.Controllers
                 await _dataContext.SaveChangesAsync();
                 shopCart = cart;
             }
+
+       //     bool isTimeOverlap = shopCart.Items.Any(item =>
+       //item.Locations.Id == dto.LocationId &&
+       //!(dto.EndTime <= item.StartTime || dto.StartTime >= item.EndTime));
+
+       //     if (isTimeOverlap)
+       //     {
+       //         return HandleResult(Result<string>.Failure("Time overlap with existing cart items"));
+       //     }
+
+
             shopCart.AddItem(location, dto.CountPeople,dto.StartTime, dto.EndTime,dto.Objectives);
             try
             {
@@ -155,6 +179,8 @@ namespace BackendAPI.Controllers
                 return HandleResult(Result<string>.Success("Fail Add Product to Cart"));
             }
         }
+
+
 
         private async Task<Cart> RetrieveCart(string accountId)
         {
@@ -188,35 +214,52 @@ namespace BackendAPI.Controllers
             return HandleResult(Result<object>.Success(cartItems));
         }
 
-        [HttpDelete("DeleteItemToCart")]
-        public async Task<ActionResult> DeleteItemToCart(DeleteLocationInCartDTO dto)
-        {
-            var userCart = await RetrieveCart(dto.UserId);
-            if (userCart == null)
-            {
-                return HandleResult(Result<string>.Failure("Cart not found"));
-            }
+        //[HttpDelete("DeleteItemToCart")]
+        //public async Task<ActionResult> DeleteItemToCart(DeleteLocationInCartDTO dto)
+        //{
+        //    var userCart = await RetrieveCart(dto.UserId);
+        //    if (userCart == null)
+        //    {
+        //        return HandleResult(Result<string>.Failure("Cart not found"));
+        //    }
 
-            var cartItem = userCart.Items.FirstOrDefault(item => item.Locations.Id == dto.LocationId);
-            if (cartItem == null)
+        //    var cartItem = userCart.Items.FirstOrDefault(item => item.Id == dto.ItemId);
+        //    if (cartItem == null)
+        //    {
+        //        return HandleResult(Result<string>.Failure("Item not found in the cart"));
+        //    }
+        //    //try
+        //    //{
+        //    //    var locationToRemove = await _dataContext.Locations.FirstOrDefaultAsync(l => l.Id == dto.ItemId);
+        //    //    if (locationToRemove != null)
+        //    //    {
+        //    //        locationToRemove.Status = 1;
+        //    //    }
+        //    //    _dataContext.CartItems.Remove(cartItem);
+        //    //    await _dataContext.SaveChangesAsync();
+        //    //    return HandleResult(Result<string>.Success("Item removed from cart successfully"));
+        //    //}
+        //    //catch (DbUpdateException ex)
+        //    //{
+        //    //    return HandleResult(Result<string>.Failure("Failed to remove item from cart"));
+        //    //}
+        //    _dataContext.CartItems.Remove(cartItem);
+        //    await _dataContext.SaveChangesAsync();
+        //    return HandleResult(Result<string>.Success("Item removed from cart Successfully"));
+        //}
+
+
+        [HttpDelete("DeleteItemToCartByItemId")]
+        public async Task<ActionResult> DeleteItemToCart(int ItemId)
+        {
+            var userCartItems = await _dataContext.CartItems.FirstOrDefaultAsync(item => item.Id == ItemId);
+            if (userCartItems == null)
             {
                 return HandleResult(Result<string>.Failure("Item not found in the cart"));
             }
-            try
-            {
-                var locationToRemove = await _dataContext.Locations.FirstOrDefaultAsync(l => l.Id == dto.LocationId);
-                if (locationToRemove != null)
-                {
-                    locationToRemove.Status = 1;
-                }
-                _dataContext.CartItems.Remove(cartItem);
-                await _dataContext.SaveChangesAsync();
-                return HandleResult(Result<string>.Success("Item removed from cart successfully"));
-            }
-            catch (DbUpdateException ex)
-            {
-                return HandleResult(Result<string>.Failure("Failed to remove item from cart"));
-            }
+            _dataContext.CartItems.Remove(userCartItems);
+            await _dataContext.SaveChangesAsync();
+            return HandleResult(Result<string>.Success("Item removed from cart Successfully"));
         }
 
         //[HttpPost("UpdateItemInCart")]

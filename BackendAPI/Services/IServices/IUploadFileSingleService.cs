@@ -12,5 +12,6 @@
         Task<string> UploadImages(IFormFile formFile);
 
         Task DeleteFileImages(string file);
+        Task<string> UploadImagesProfileUser(IFormFile formFile);
     }
 }

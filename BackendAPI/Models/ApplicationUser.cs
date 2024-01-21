@@ -4,9 +4,9 @@ namespace BackendAPI.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        //public int ProfileImage { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int AgencyId { get; set; }
+        public string ProfileImage { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public int AgencyId { get; set; } = 0;
     }
 }

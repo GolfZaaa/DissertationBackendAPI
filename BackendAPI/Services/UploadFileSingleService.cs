@@ -59,6 +59,33 @@ namespace BackendAPI.Services
             return fileName;
         }
 
+        public async Task<string> UploadImagesProfileUser(IFormFile formFile)
+        {
+            string fileName = null;
+
+            if (formFile != null && formFile.Length > 0)
+            {
+                // Handle file upload
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string uploadPath = Path.Combine(wwwRootPath, "profileUserImage");
+
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                fileName = Guid.NewGuid().ToString() + Path.GetExtension(formFile.FileName);
+                string filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = File.Create(filePath))
+                {
+                    await formFile.CopyToAsync(stream);
+                }
+            }
+
+            return fileName;
+        }
+
 
 
         public string Validation(IFormFile formFile)

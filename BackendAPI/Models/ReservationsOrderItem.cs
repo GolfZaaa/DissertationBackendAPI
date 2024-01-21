@@ -12,6 +12,8 @@ namespace BackendAPI.Models
         public Location Location { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
+        public string Objectives { get; set; }
+        public int CountPeople { get; set; }
         public long Price { get; set; }
         public int ReservationsOrderId { get; set; }
         [JsonIgnore]

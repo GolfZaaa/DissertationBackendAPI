@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240116085002_init55")]
+    partial class init55
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,10 +97,6 @@ namespace BackendAPI.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("ProfileImage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -341,9 +340,6 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CountPeople")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
@@ -404,31 +400,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "01606e76-d337-44f0-91d4-457f0efe5dde",
+                            Id = "892b0d2d-3b0c-4599-bdbe-c2dac999c411",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "c8f4fc04-cdf5-4640-868f-f0182f7e4abf",
+                            Id = "99d86e16-589e-428a-9c2b-3ddf6324c755",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "cc100666-c92f-4aeb-9ef5-b06b324214ae",
+                            Id = "ac122bf3-7e9f-4086-823d-57e1ce2b5783",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "90c1d9fd-054f-4d47-b478-a891d92c539b",
+                            Id = "3c9b4bb3-ad03-4840-b3d2-6aa5e57e51ad",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "fc2c52f0-ad64-4f3e-863f-015483057bc2",
+                            Id = "3d29276b-3bbb-4cec-9ff2-cb7cdb53e590",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });
