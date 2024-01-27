@@ -84,17 +84,48 @@ namespace BackendAPI.Services
             var find = await _dataContext.CategoryLocations.FindAsync(dto.Id);
 
             if (find == null) return Result<string>.Failure("Not Found CategoryID ");
+  
 
-            if (_dataContext.CategoryLocations.Any(x => x.Name == dto.Name))
-                return Result<string>.Failure("Category name have already");
+            if (dto.Name != null && dto.Name != find.Name)
+            {
+                if (_dataContext.CategoryLocations.Any(x => x.Name == dto.Name))
+                    return Result<string>.Failure("Category name have already");
+                find.Name = dto.Name;
+            }
 
-            find.Name = dto.Name;
-            find.Servicefees = dto.Servicefees;
-            find.DateTimeCreate = dto.DateTimeCreate;
+            if (dto.Servicefees != null && dto.Servicefees != find.Servicefees)
+            {
+                find.Servicefees = dto.Servicefees;
+            }
+
+            if(dto.Detail != null)
+            {
+                find.Detail = dto.Detail;
+            }
+
+            if (dto.Image != null)
+            {
+                string imageFileName = "";
+                string uploadDirectory = "wwwroot/CategoryLocation";
+                imageFileName = "Lo_" + Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
+                var imagePath = Path.Combine(uploadDirectory, imageFileName);
+
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await dto.Image.CopyToAsync(stream);
+                }
+
+                find.Image = imageFileName;
+
+                await _dataContext.SaveChangesAsync();
+            }
 
             await _dataContext.SaveChangesAsync();
 
             return Result<string>.Success("Update Category Success");
         }
+
+
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BackendAPI.Core;
 using BackendAPI.Data;
+using BackendAPI.DTOs;
 using BackendAPI.DTOs.RoomsDto;
 using BackendAPI.Models;
 using BackendAPI.Response;
@@ -60,6 +61,27 @@ public class LocationController : BaseApiController
     public async Task<ActionResult> DeleteLocation(int id)
     {
        return HandleResult(await _locationService.DeleteLocationAsync(id));
+    }
+
+    [HttpPost("TurnOnOffLocation")]
+    public async Task<ActionResult> TurnOnOffLocation(TurnOnOffDto dto)
+    {
+        var location = await _dataContext.Locations.FirstOrDefaultAsync(x => x.Id == dto.Id);
+        if (location == null)
+        {
+            HandleResult(Result<string>.Failure("Not Found Location"));
+        }
+
+        if (dto.StatusOnOff == 0)
+        {
+            location.StatusOnOff = 0;
+        }
+        else
+        {
+            location.StatusOnOff = 1;
+        }
+        await _dataContext.SaveChangesAsync();
+        return Ok(location);
     }
 
 }

@@ -40,11 +40,11 @@ namespace BackendAPI.Data
 
             builder.Entity<IdentityRole>()
             .HasData(
-                new IdentityRole { Name = "Student", NormalizedName = "student" },
-                new IdentityRole { Name = "Professor", NormalizedName = "Professor" },
-                new IdentityRole { Name = "Outsider", NormalizedName = "Outsider" },
-                new IdentityRole { Name = "Approver", NormalizedName = "Approver" },
-                new IdentityRole { Name = "Administrator", NormalizedName = "Administrator" }
+                new IdentityRole { Name = "Student", NormalizedName = "นักศึกษา" },
+                new IdentityRole { Name = "Professor", NormalizedName = "อาจารย์" },
+                new IdentityRole { Name = "Outsider", NormalizedName = "บุคคลภายนอก" },
+                new IdentityRole { Name = "Approver", NormalizedName = "ผู้อนุมัติ" },
+                new IdentityRole { Name = "Administrator", NormalizedName = "ผู้ดูแลระบบ" }
             );
 
             builder.Entity<Cart>(options =>

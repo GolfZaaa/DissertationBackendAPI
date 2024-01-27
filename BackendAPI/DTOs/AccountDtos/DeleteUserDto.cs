@@ -6,11 +6,3 @@ namespace BackendAPI.DTOs.AccountDtos;
         public string UserId { get; set; }
     }
 
-
-public class DeleteUserValidator : AbstractValidator<DeleteUserDto>
-{
-    public DeleteUserValidator()
-    {
-        RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is empty");
-    }
-}

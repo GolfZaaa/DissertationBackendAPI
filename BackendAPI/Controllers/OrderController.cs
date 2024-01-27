@@ -368,7 +368,7 @@ namespace BackendAPI.Controllers
             {
                 orderItemsHtml += $@"
                     <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
-                        <p><strong>Location:</strong> {item.Location}</p>
+                        <p><strong>Location:</strong> {item.Location.Name}</p>
                         <p><strong>StartTime:</strong> {item.StartTime}</p>
                         <p><strong>EndTime:</strong> {item.EndTime}</p>
                         <p><strong>Price:</strong> {item.Price}</p>
@@ -376,49 +376,49 @@ namespace BackendAPI.Controllers
             }
 
 
-    //        var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
-    //        var to = new EmailAddress(checkuser.Email);
-    //        var subject = "Order Confirmation";
-    //        var htmlContent = $@"
-    //<div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
-    //    <div style=""text-align: center;"">
-    //        <img src=""https://api.freelogodesign.org/assets/thumb/logo/a17b07eb64d341ffb1e09392aa3a1698_400.png"" alt=""Company Logo"" style=""max-width: 150px; margin-bottom: 20px;"">
-    //        <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
-    //        <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
-    //    </div>
+            var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
+            var to = new EmailAddress(checkuser.Email);
+            var subject = "Order Confirmation";
+            var htmlContent = $@"
+    <div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
+        <div style=""text-align: center;"">
+            <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 150px; margin-bottom: 20px;"">
+            <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
+            <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
+        </div>
 
-    //    <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+        <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
 
-    //    <div style=""margin-bottom: 20px;"">
-    //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Details</h3>
-    //        <p><strong>Order ID:</strong> {order.Id}</p>
-    //        <p><strong>Order Date:</strong> {order.OrderDate}</p>
-    //    </div>
+        <div style=""margin-bottom: 20px;"">
+            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Details</h3>
+            <p><strong>Order ID:</strong> {order.Id}</p>
+            <p><strong>Order Date:</strong> {order.OrderDate}</p>
+        </div>
 
-    //    <div style=""margin-bottom: 20px;"">
-    //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Personal Information</h3>
-    //        <p>{checkuser.FirstName}, {checkuser.LastName}, {checkuser.PhoneNumber}</p>
-    //    </div>
+        <div style=""margin-bottom: 20px;"">
+            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Personal Information</h3>
+            <p>{checkuser.FirstName}, {checkuser.LastName}, {checkuser.PhoneNumber}</p>
+        </div>
 
-    //    <div style=""margin-bottom: 20px;"">
-    //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Items</h3>
-    //        {orderItemsHtml}
-    //    </div>
+        <div style=""margin-bottom: 20px;"">
+            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Items</h3>
+            {orderItemsHtml}
+        </div>
 
-    //    <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+        <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
 
-    //    <div style=""text-align: right;"">
-    //        <p style=""font-size: 18px; color: #333;""><strong>Total Amount:</strong> {order.TotalPrice}</p>
-    //    </div>
+        <div style=""text-align: right;"">
+            <p style=""font-size: 18px; color: #333;""><strong>Total Amount:</strong> {order.TotalPrice}</p>
+        </div>
 
-    //    <div style=""text-align: center; margin-top: 20px;"">
-    //        <p style=""font-size: 16px; color: #666;"">Thank you for your purchase!</p>
-    //      </div>
-    //        </div>";
+        <div style=""text-align: center; margin-top: 20px;"">
+            <p style=""font-size: 16px; color: #666;"">Thank you for your purchase!</p>
+          </div>
+            </div>";
 
 
-    //        var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
-    //        await _sendGridClient.SendEmailAsync(emailMessage);
+            var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
+            await _sendGridClient.SendEmailAsync(emailMessage);
 
 
             return Ok(order);

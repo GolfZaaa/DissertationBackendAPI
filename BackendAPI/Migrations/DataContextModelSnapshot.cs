@@ -102,6 +102,9 @@ namespace BackendAPI.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("StatusOnOff")
+                        .HasColumnType("int");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -404,31 +407,31 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "01606e76-d337-44f0-91d4-457f0efe5dde",
+                            Id = "4801d1e3-6ea5-4f20-a2ab-e00cef6026aa",
                             Name = "Student",
                             NormalizedName = "student"
                         },
                         new
                         {
-                            Id = "c8f4fc04-cdf5-4640-868f-f0182f7e4abf",
+                            Id = "8a7eeaa8-20d1-4ddf-a1ea-fbb7edeacc91",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "cc100666-c92f-4aeb-9ef5-b06b324214ae",
+                            Id = "6e326f1b-b9bc-475d-b227-b9cd23175348",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "90c1d9fd-054f-4d47-b478-a891d92c539b",
+                            Id = "41bb4b55-c935-4382-9798-79610e4def12",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "fc2c52f0-ad64-4f3e-863f-015483057bc2",
+                            Id = "f43ef2bd-f247-484d-a033-912eea2bad6a",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
                         });

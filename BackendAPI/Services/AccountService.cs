@@ -53,7 +53,7 @@ namespace BackendAPI.Services
             var result = await _userManager.AddToRoleAsync(user, dto.Role);
 
             if (result.Succeeded)
-                return Result<string>.Success($"AddRole {dto.Role} for {user.UserName} Success");
+                return Result<string>.Success($"AddRole Success");
             else
                 return Result<string>.Failure("An error occurred while adding a role.");
         }
@@ -239,9 +239,26 @@ namespace BackendAPI.Services
                 Roles = _userManager.GetRolesAsync(user).Result,
                 EmailConfirm = user.EmailConfirmed,
                 AccessLoginFailed = user.AccessFailedCount,
+                ProfileImage = user.ProfileImage,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                AgencyName = GetAgencyName(user.AgencyId).Result,
+                StatusOnOff = user.StatusOnOff,
             }).ToList<object>();
 
             return Result<List<object>>.Success(usersWithRoles);
+        }
+
+        private async Task<string> GetAgencyName(int agencyId)
+        {
+            var agency = await _dataContext.Agencys
+                .Where(x => x.Id == agencyId)
+                .Select(x => x.Name)
+                .FirstOrDefaultAsync();
+
+            return agency;
         }
 
         public async Task<Result<string>> ChangePasswordAsync(ChangePasswordDto dto)
@@ -312,9 +329,9 @@ namespace BackendAPI.Services
             return Result<string>.Success("Email confirmed successfully.");
         }
 
-        public async Task<Result<string>> DeleteAsync(DeleteUserDto dto)
+        public async Task<Result<string>> DeleteAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(dto.UserId);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
                 await _userManager.DeleteAsync(user);

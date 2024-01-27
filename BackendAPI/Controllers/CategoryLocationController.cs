@@ -1,5 +1,6 @@
 ﻿using BackendAPI.Core;
 using BackendAPI.Data;
+using BackendAPI.DTOs;
 using BackendAPI.DTOs.CategoryDtos;
 using BackendAPI.DTOs.RoomsDto;
 using BackendAPI.Services;
@@ -58,17 +59,15 @@ namespace BackendAPI.Controllers
         }
 
         [HttpPut("UpdateCategoryService")]
-        public async Task<ActionResult> UpdateCategory(UpdateCategoryDto dto)
+        public async Task<ActionResult> UpdateCategory([FromForm]UpdateCategoryDto dto)
         {
             var Create = new UpdateCategoryDtoValidator();
             var result = Create.Validate(dto);
-
             if (!result.IsValid)
             {
                 var errors = result.Errors.Select(error => error.ErrorMessage).ToList();
                 return BadRequest(new { Message = "Validation Create Error", Errors = errors });
             }
-
             return HandleResult(await _categoryLocationService.UpdateCategoryAsync(dto));
         }
 
@@ -87,5 +86,41 @@ namespace BackendAPI.Controllers
 
             return Ok(new { Category = result, Locations = locations });
         }
+
+
+        [HttpPost("TurnOnOffCategory")]
+        public async Task<ActionResult> TurnOnOffCategory(TurnOnOffDto dto)
+        {
+            var category = await _dataContext.CategoryLocations.FirstOrDefaultAsync(x => x.Id == dto.Id);
+            if (category == null)
+            {
+                HandleResult(Result<string>.Failure("Not Found Category"));
+            }
+
+            if(dto.StatusOnOff == 0)
+            {
+                category.StatusOnOff = 0;
+            }
+            else
+            {
+                category.StatusOnOff = 1;
+            }
+            await _dataContext.SaveChangesAsync();
+            return Ok(category);
+        }
+
+        [HttpGet("GetCategoryStatus")]
+        public async Task<ActionResult> GetCategoryStatus ()
+        {
+            var category = await _dataContext.CategoryLocations.Where(x => x.StatusOnOff == 1).ToListAsync();
+            if(category == null)
+            {
+                HandleResult(Result<string>.Failure("Not Found Category"));
+            }
+
+            return Ok(category);
+        }
+
+
     }
 }

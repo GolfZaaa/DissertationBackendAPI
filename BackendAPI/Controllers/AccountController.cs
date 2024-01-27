@@ -84,17 +84,9 @@ public class AccountController : BaseApiController
     }
 
     [HttpDelete("DeleteUserService")]
-    public async Task<ActionResult> DeleteUser(DeleteUserDto dto)
+    public async Task<ActionResult> DeleteUser(string userId)
     {
-        var validator = new DeleteUserValidator();
-        var resultvalidate = validator.Validate(dto);
-
-        if (!resultvalidate.IsValid)
-        {
-            var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
-            return BadRequest(new { Message = "Validation DeleteUser", Errors = errors });
-        }
-        return HandleResult(await _accountServices.DeleteAsync(dto));
+        return HandleResult(await _accountServices.DeleteAsync(userId));
     }
 
     [HttpPost("AddProfileUser")]
@@ -142,6 +134,7 @@ public class AccountController : BaseApiController
 
         return HandleResult(Result<object>.Success(search));
     }
+
 
     //[HttpGet("SearUserandAgencyByUserId")]
     //public async Task<ActionResult> SearhUserandAgencyByUserId(string userId)

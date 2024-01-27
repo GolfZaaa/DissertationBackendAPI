@@ -14,7 +14,7 @@ namespace BackendAPI.Services.IServices
         Task<Result<object>> RegisterAsync(RegisterDto registerDto);
         Task<Result<object>> LoginAsync(LoginDto dto);
         Task<Result<string>> ConfirmEmailUserAsync(ConfirmEmailUserDto dto);
-        Task<Result<string>> DeleteAsync(DeleteUserDto dto);
+        Task<Result<string>> DeleteAsync(string userId);
 
         // ForgotPassword User Start
         Task<Result<string>> ForgetPasswordAsync(ForgetPasswordDto dto);
