@@ -4,6 +4,7 @@ using BackendAPI.DTOs.OrderDtos;
 using BackendAPI.Models;
 using BackendAPI.Services.IServices;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SendGrid;
@@ -19,13 +20,17 @@ namespace BackendAPI.Controllers
         private readonly IConfiguration _configuration;
         private readonly IUploadFileSingleService _uploadFileSingleService;
         private readonly SendGridClient _sendGridClient;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public OrderController(DataContext dataContext, IConfiguration configuration, IUploadFileSingleService uploadFileSingleService, SendGridClient sendGridClient)
+        public OrderController(DataContext dataContext, IConfiguration configuration, IUploadFileSingleService uploadFileSingleService, SendGridClient sendGridClient, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _dataContext = dataContext;
             _configuration = configuration;
             _uploadFileSingleService = uploadFileSingleService;
             _sendGridClient = sendGridClient;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
         public List<ReservationsOrderItem> OrderItems { get; set; } = new List<ReservationsOrderItem>();
 
@@ -141,13 +146,11 @@ namespace BackendAPI.Controllers
 
             foreach (var reservationItem in overdueReservations)
             {
-                // Check if the location status is 0 and update it to 1
                 if (reservationItem.Location.Status == 0)
                 {
                     reservationItem.Location.Status = 1;
                 }
 
-                // Update the reservation status and set StatusFinished to 0
                 reservationItem.StatusFinished = 0;
             }
             await _dataContext.SaveChangesAsync();
@@ -353,12 +356,14 @@ namespace BackendAPI.Controllers
                     order.PaymentIntentId = intent.Id; // เอาใบส่งของใส่ในใบสั่งซื้อ
                     order.ClientSecret = intent.ClientSecret; // เอารหัสลับใส่ในใบสั่งซื้อ
                 };
+                order.OrderStatus = Models.OrderStatus.SuccessfulPaymentforcreditCard;
             }
             else
             {
                 (string errorMessgeMain, string imageNames) =
                 await UploadImageMainAsync(dto.OrderImage);
                 order.OrderImage = imageNames;
+                order.OrderStatus = Models.OrderStatus.PendingApproval;
             }
             await _dataContext.SaveChangesAsync();
 
@@ -382,7 +387,7 @@ namespace BackendAPI.Controllers
             var htmlContent = $@"
     <div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
         <div style=""text-align: center;"">
-            <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 150px; margin-bottom: 20px;"">
+            <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 100px; margin-bottom: 20px;"">
             <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
             <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
         </div>
@@ -423,6 +428,44 @@ namespace BackendAPI.Controllers
 
             return Ok(order);
         }
+
+
+        [HttpPost("RefundOrder")]
+        public async Task<ActionResult> RefundOrder (int orderId)
+        {
+            StripeConfiguration.ApiKey = _configuration["StripeSettings:SecretKey"];
+            var order = await _dataContext.ReservationsOrders
+        .Include(o => o.OrderItems)
+        .SingleOrDefaultAsync(o => o.Id == orderId);
+            if (order == null)
+            {
+                return HandleResult(Result<string>.Failure("Order not found"));
+            }
+            if (order.OrderStatus != Models.OrderStatus.SuccessfulPaymentforcreditCard)
+            {
+                return HandleResult(Result<string>.Failure("Order is not eligible for a refund"));
+            }
+            try
+            {
+                var refundOptions = new RefundCreateOptions
+                {
+                    PaymentIntent = order.PaymentIntentId,
+                };
+
+                var refundService = new RefundService();
+                var refund = await refundService.CreateAsync(refundOptions);
+                order.OrderStatus = Models.OrderStatus.Refunded;
+                await _dataContext.SaveChangesAsync();
+
+                return Ok("Refund successful");
+            }
+            catch (Exception ex)
+            {
+                return HandleResult(Result<string>.Failure($"Refund failed: {ex.Message}"));
+            }
+        }
+
+
 
 
         //[HttpGet("GetReservationOrderByReservationOrderId")]
@@ -511,6 +554,7 @@ namespace BackendAPI.Controllers
             }); ;
         }
 
+
         [HttpGet("GetOrderByUserId")]
         public async Task<ActionResult> GetOrderByUserId(string UserId)
         {
@@ -535,7 +579,7 @@ namespace BackendAPI.Controllers
                     user.PhoneNumber,
                     user.FirstName,
                     user.LastName,
-                    user.AgencyId,
+                    AgencyName = await GetAgencyName(user.AgencyId),
                 },
                 orders = orders.Select(order => new
                 {
@@ -549,6 +593,140 @@ namespace BackendAPI.Controllers
 
             return Ok(result);
         }
+
+        private async Task<string> GetAgencyName(int agencyId)
+        {
+            var agency = await _dataContext.Agencys
+                .Where(x => x.Id == agencyId)
+                .Select(x => x.Name)
+                .FirstOrDefaultAsync();
+
+            return agency;
+        }
+
+
+        [HttpGet("GetAllOrders&OrderItem&User")]
+        public async Task<ActionResult> GetAllOrders()
+        {
+            var orders = await _dataContext.ReservationsOrders
+                .Include(x => x.OrderItems).ThenInclude(x => x.Location).ThenInclude(x => x.Category)
+                .ToListAsync();
+
+            var result = new List<object>();
+
+            foreach (var order in orders)
+            {
+                var user = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id == order.UserId);
+
+                var orderResult = new
+                {
+                    user = new
+                    {
+                        user.Email,
+                        user.UserName,
+                        user.PhoneNumber,
+                        user.FirstName,
+                        user.LastName,
+                        AgencyName = await GetAgencyName(user.AgencyId),
+                        user.StatusOnOff,
+                        user.AccessFailedCount,
+                        user.EmailConfirmed,
+                        RoleConcurrencyStamps = _userManager.GetRolesAsync(user).Result
+            .Select(role => _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp)
+                    },
+                    order.OrderImage,
+                    order.OrderDate,
+                    order.OrderStatus,
+                    order.TotalPrice,
+                    orderItems = order.OrderItems.Select(orderItem => new
+                    {
+                        orderItem.Location,
+                        orderItem.Price,
+                        orderItem.Objectives,
+                        orderItem.StartTime,
+                        orderItem.EndTime,
+                    }).ToList()
+                };
+
+                result.Add(orderResult);
+            }
+
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("GetOrderAllStatusPending")]
+        public async Task<ActionResult> GetOrderAllStatusPending()
+        {
+            var orders = await _dataContext.ReservationsOrders
+                .Include(x => x.OrderItems).ThenInclude(x => x.Location).ThenInclude(x => x.Category)
+                .Where(x => x.OrderStatus == Models.OrderStatus.PendingApproval) 
+                .ToListAsync();
+
+            var result = new List<object>();
+
+            foreach (var order in orders)
+            {
+                var user = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id == order.UserId);
+
+                var orderResult = new
+                {
+                    user = new
+                    {
+                        user.Email,
+                        user.UserName,
+                        user.PhoneNumber,
+                        user.FirstName,
+                        user.LastName,
+                        AgencyName = await GetAgencyName(user.AgencyId),
+                        user.StatusOnOff,
+                        user.AccessFailedCount,
+                        user.EmailConfirmed,
+                        RoleConcurrencyStamps = _userManager.GetRolesAsync(user).Result
+                            .Select(role => _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp)
+                    },
+                    order.Id,
+                    order.OrderImage,
+                    order.OrderDate,
+                    order.OrderStatus,
+                    order.TotalPrice,
+                    orderItems = order.OrderItems.Select(orderItem => new
+                    {
+                        orderItem.Location,
+                        orderItem.Price,
+                        orderItem.Objectives,
+                        orderItem.StartTime,
+                        orderItem.EndTime,
+                    }).ToList()
+                };
+
+                result.Add(orderResult);
+            }
+
+            return Ok(result);
+        }
+
+
+        [HttpGet("UpdateOrderStatus")]
+        public async Task<ActionResult> UpdateOrderStatus(int orderId)
+        {
+            var order = await _dataContext.ReservationsOrders
+                .Include(x => x.OrderItems)
+                .FirstOrDefaultAsync(x => x.Id == orderId);
+
+            if (order == null)
+            {
+                return NotFound($"Order with id {orderId} not found");
+            }
+
+            order.OrderStatus = Models.OrderStatus.SuccessfulPayment; 
+            await _dataContext.SaveChangesAsync();
+
+            return Ok("OrderStatus Update");
+        }
+
+
 
 
         //[HttpGet("GetOrderByUserId")]

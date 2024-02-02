@@ -57,6 +57,7 @@ namespace BackendAPI.Services
             {
                 Id = x.Id,
                 Name = x.Name,
+                ConcurrencyStamp = x.ConcurrencyStamp,
             }).ToList<object>();
             return Result<List<object>>.Success(usersWithRoles);
         }

@@ -21,7 +21,8 @@ public class Cart
                 EndTime = endTime,
                 Objectives = objectives
             });
-            }
+        }
+
         //รายการที่มีอยู่ ถ้ามีสินค้าในตะกร้าอยู่แล้วให้บวกจำนวนเพิ่มเข้าไป
         var existingItem = Items.FirstOrDefault(item => item.Locations.Id == location.Id);
         if (existingItem != null)

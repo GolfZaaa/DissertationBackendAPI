@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using SendGrid;
+using System.IO;
 using System.Security.Claims;
 
 namespace BackendAPI.Controllers;
@@ -23,14 +24,16 @@ public class AccountController : BaseApiController
     private readonly IAccountServices _accountServices;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
     public AccountController(DataContext dataContext, IAccountServices accountServices, UserManager<ApplicationUser> userManager,
-        IHttpContextAccessor httpContextAccessor)
+        IHttpContextAccessor httpContextAccessor, RoleManager<IdentityRole> roleManager)
     {
         _dataContext = dataContext;
         _accountServices = accountServices;
         _userManager = userManager;
         _httpContextAccessor = httpContextAccessor;
+        _roleManager = roleManager;
     }
 
     [HttpGet("GetAllUserService")]
@@ -134,6 +137,88 @@ public class AccountController : BaseApiController
 
         return HandleResult(Result<object>.Success(search));
     }
+
+
+
+    [HttpGet("GetRemainingRolesByUserId")]
+    public async Task<ActionResult<Result<List<RoleInfo>>>> GetRemainingRolesByUserId(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+            return NotFound(Result<List<RoleInfo>>.Failure("User not found."));
+
+        var userRoles = await _userManager.GetRolesAsync(user);
+
+        var allRoles = await _roleManager.Roles.ToListAsync();
+
+        var remainingRoles = allRoles
+            .Where(role => !userRoles.Contains(role.Name))
+            .Select(role => new RoleInfo
+            {
+                Id = role.Id,
+                ConcurrencyStamp = role.ConcurrencyStamp
+            })
+        .ToList();
+        return Ok(Result<List<RoleInfo>>.Success(remainingRoles));
+    }
+
+
+    [HttpGet("CreateAdminIfNoUser")]
+    public async Task<ActionResult> CreateAdminIfNoUser()
+    {
+        var users = await _userManager.Users.ToListAsync();
+
+        if (users.Count == 0)
+        {
+            var adminUser = new ApplicationUser
+            {
+                UserName = "Admin",
+                Email = "admin@kru.ac.th",
+                FirstName = "",
+                LastName = "",
+                ProfileImage = "",
+                EmailConfirmed = true,
+            };
+            var result = await _userManager.CreateAsync(adminUser, "!A@we1235");
+
+            if (result != null)
+            {
+                await _userManager.AddToRoleAsync(adminUser, "Administrator");
+
+                return Ok("Admin user created successfully.");
+            }
+            else
+            {
+                return BadRequest("Failed to create admin user.");
+            }
+        }
+
+        return Ok("have Users already.");
+    }
+
+
+    [HttpGet("GetEmailUserByUserName")]
+    public async Task<ActionResult> GetEmailUserByUserName(string username)
+    {
+        var user = await _dataContext.Users.FirstOrDefaultAsync(x=>x.UserName == username);
+
+        var result = new
+        {
+            user = new
+            {
+                user.Email
+            }
+        };
+        return Ok(result);
+
+    }
+
+
+
+
+
+
 
 
     //[HttpGet("SearUserandAgencyByUserId")]

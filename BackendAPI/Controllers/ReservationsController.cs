@@ -170,6 +170,10 @@ namespace BackendAPI.Controllers
             shopCart.AddItem(location, dto.CountPeople,dto.StartTime, dto.EndTime,dto.Objectives);
             try
             {
+                if(dto.StartTime == dto.EndTime)
+                {
+                    return HandleResult(Result<string>.Failure("Time Start match with End Time"));
+                }
                 await _dataContext.SaveChangesAsync();
                 return HandleResult(Result<string>.Success("Add Product to Cart Successfuly"));
 

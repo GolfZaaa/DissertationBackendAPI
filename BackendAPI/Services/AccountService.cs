@@ -41,22 +41,27 @@ namespace BackendAPI.Services
         {
             var user = await _userManager.FindByIdAsync(dto.UserId);
 
-            if (user == null) return Result<string>.Failure("User not found.");
+            if (user == null)
+                return Result<string>.Failure("User not found.");
 
-            //RoleExistsAsync ตรวจสอบว่าบทบาทนี้มีอยู่หรือเปล่า 
-            if (!await _roleManager.RoleExistsAsync(dto.Role)) return Result<string>.Failure("There is no role.");
+            // ตรวจสอบว่ามี Role นี้หรือไม่
+            var role = await _roleManager.FindByIdAsync(dto.RoleId);
+            if (role == null)
+                return Result<string>.Failure("Role not found.");
 
-            // IsInRoleAsync ตรวจสอบว่าผู้ใช้มีบทบาทนี้อยู่แล้วหรือเปล่า
-            if (await _userManager.IsInRoleAsync(user, dto.Role)) return Result<string>.Failure("User already has this role.");
+            // ตรวจสอบว่าผู้ใช้มี Role นี้อยู่แล้วหรือไม่
+            if (await _userManager.IsInRoleAsync(user, role.Name))
+                return Result<string>.Failure("User already has this role.");
 
-            // เพิ่มบทบาทให้กับผู้ใช้
-            var result = await _userManager.AddToRoleAsync(user, dto.Role);
+            // เพิ่ม Role ให้กับผู้ใช้
+            var result = await _userManager.AddToRoleAsync(user, role.Name);
 
             if (result.Succeeded)
                 return Result<string>.Success($"AddRole Success");
             else
                 return Result<string>.Failure("An error occurred while adding a role.");
         }
+
 
         public async Task<Result<object>> LoginAsync(LoginDto dto)
         {
@@ -95,7 +100,7 @@ namespace BackendAPI.Services
                     _dataContext.Add(newLoginAttempt);
                     _dataContext.SaveChanges();
 
-                    return Result<object>.Failure("Failed to login. You have 1 more attempt.");
+                    return Result<object>.Failure("Failed to login. You have 1 more attempts.");
                 }
                 else if (loginAttempts.Count == 2)
                 {
@@ -130,7 +135,7 @@ namespace BackendAPI.Services
                         user.AccessFailedCount = 1;
                         _dataContext.Add(newLoginAttempt);
                         _dataContext.SaveChanges();
-                        return Result<object>.Failure("Failed to login. You have 2 more attempt.");
+                        return Result<object>.Failure("Failed to login. You have 2 more attempts.");
                     }
                     return Result<object>.Failure("Your account is temporarily blocked. Please login again after 10 Seconds.");
                 }
@@ -145,8 +150,7 @@ namespace BackendAPI.Services
                 Token = await _tokenService.GenerateToken(user),
                 UserId = userId,
                 role = roles.ToArray(),
-                // ProfileImage = user.ProfileImage,
-
+                ProfileImage = user.ProfileImage,
             };
             return Result<object>.Success(userDto);
 
@@ -160,6 +164,10 @@ namespace BackendAPI.Services
             var Checkrole = await _roleManager.RoleExistsAsync(registerDto.Role);
             if (!Checkrole) return Result<object>.Failure("The specified role does not exist.");
 
+            var CheckUser = await _userManager.FindByNameAsync(registerDto.Username);
+            if (CheckUser != null) return Result<object>.Failure("This user has already been used.");
+
+
             var createuser = new ApplicationUser
             {
                 UserName = registerDto.Username,
@@ -167,6 +175,7 @@ namespace BackendAPI.Services
                 EmailConfirmed = false,
                 FirstName = "",
                 LastName = "",
+                ProfileImage = "",
             };
 
             var result = await _userManager.CreateAsync(createuser, registerDto.Password);
@@ -175,14 +184,11 @@ namespace BackendAPI.Services
             await _userManager.AddToRoleAsync(createuser, registerDto.Role);
             // สร้าง token สำหรับการยืนยันอีเมล์
 
-            await _userManager.AddToRoleAsync(createuser, registerDto.Role);
-            // สร้าง token สำหรับการยืนยันอีเมล์
-
             Random random = new Random();
             int randomNumber = random.Next(1000, 9999);
             string token = randomNumber.ToString();
 
-            _memoryCache.Set("Token", token, TimeSpan.FromDays(1));
+            _memoryCache.Set("Token", token, TimeSpan.FromDays(30));
 
             await _userManager.UpdateAsync(createuser);
 
@@ -246,6 +252,9 @@ namespace BackendAPI.Services
                 PhoneNumber = user.PhoneNumber,
                 AgencyName = GetAgencyName(user.AgencyId).Result,
                 StatusOnOff = user.StatusOnOff,
+                RoleConcurrencyStamps = _userManager.GetRolesAsync(user).Result
+            .Select(role => _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp)
+            .ToList(),
             }).ToList<object>();
 
             return Result<List<object>>.Success(usersWithRoles);
@@ -321,7 +330,7 @@ namespace BackendAPI.Services
 
             if (string.IsNullOrEmpty(token)) return Result<string>.Failure("Token has expired.");
 
-            if (dto.TokenConfirm != token) return Result<string>.Failure($"{dto.TokenConfirm} is Wrong");
+            if (dto.TokenConfirm != token) return Result<string>.Failure("Token is Wrong");
             else user.EmailConfirmed = true;
 
             await _userManager.UpdateAsync(user);

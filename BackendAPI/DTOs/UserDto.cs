@@ -12,6 +12,6 @@
         public string phoneNumber { get; set; }
         public int AgencyId { get; set; }
 
-        //public string ProfileImage { get; set; }
+        public string ProfileImage { get; set; }
     }
 }

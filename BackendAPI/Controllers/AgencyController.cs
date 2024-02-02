@@ -41,12 +41,9 @@ namespace BackendAPI.Controllers
         public async Task<IActionResult> GetAgency()
         {
             var result = await _dataContext.Agencys.ToListAsync();
-            if (result == null || result.Count == 0)
-            {
-                return HandleResult(Result<dynamic>.Failure("Notfound Agency"));
-            }
-            return HandleResult(Result<dynamic>.Success(result));
+            return HandleResult(Result<dynamic>.Success(result.Any() ? result : new List<Agency>()));
         }
+
 
         [HttpPost("UpdateAgency")]
         public async Task<ActionResult> UpdateAgency (UpdateAgencyDto dto)
@@ -66,7 +63,7 @@ namespace BackendAPI.Controllers
             return HandleResult(Result<string>.Success("Update Agency Success"));
         }
 
-        [HttpDelete]
+        [HttpDelete("DeleteAgency")]
         public async Task<ActionResult> DeleteAgency(int id)
         {
             var agency = await _dataContext.Agencys.FindAsync(id);
