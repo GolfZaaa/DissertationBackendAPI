@@ -157,15 +157,18 @@ namespace BackendAPI.Controllers
                 shopCart = cart;
             }
 
-       //     bool isTimeOverlap = shopCart.Items.Any(item =>
-       //item.Locations.Id == dto.LocationId &&
-       //!(dto.EndTime <= item.StartTime || dto.StartTime >= item.EndTime));
 
-       //     if (isTimeOverlap)
-       //     {
-       //         return HandleResult(Result<string>.Failure("Time overlap with existing cart items"));
-       //     }
+            var existingReservation = shopCart.Items.FirstOrDefault(item =>
+        item.Locations.Id == location.Id &&
+        ((dto.StartTime >= item.StartTime && dto.StartTime < item.EndTime) ||
+         (dto.EndTime > item.StartTime && dto.EndTime <= item.EndTime) ||
+         (item.StartTime >= dto.StartTime && item.StartTime < dto.EndTime) ||
+         (item.EndTime > dto.StartTime && item.EndTime <= dto.EndTime)));
 
+            if (existingReservation != null)
+            {
+                return HandleResult(Result<string>.Failure("Reservation for the selected location and time slot already exists in the cart."));
+            }
 
             shopCart.AddItem(location, dto.CountPeople,dto.StartTime, dto.EndTime,dto.Objectives);
             try
@@ -174,6 +177,13 @@ namespace BackendAPI.Controllers
                 {
                     return HandleResult(Result<string>.Failure("Time Start match with End Time"));
                 }
+
+                var newItem = shopCart.Items.FirstOrDefault(item => item.Locations.Id == location.Id);
+                if (newItem != null)
+                {
+                    newItem.Selected = false;
+                }
+
                 await _dataContext.SaveChangesAsync();
                 return HandleResult(Result<string>.Success("Add Product to Cart Successfuly"));
 
@@ -216,6 +226,28 @@ namespace BackendAPI.Controllers
             var cartItems = userCart.Items; // นี่คือรายการสินค้าทั้งหมดในตะกร้า
          
             return HandleResult(Result<object>.Success(cartItems));
+        }
+
+        [HttpPost("SelectItems")]
+        public async Task<ActionResult> SelectItems(SelectItemDTO dto)
+        {
+            var items = await _dataContext.CartItems.FirstOrDefaultAsync(x=>x.Id == dto.CartItemId);
+
+            if(items == null)
+            {
+                return HandleResult(Result<string>.Failure("Not Found Items Id"));
+            }
+
+            if(dto.Selecte == true)
+            {
+                items.Selected = true;
+            }
+            else
+            {
+                items.Selected = false;
+            }
+            await _dataContext.SaveChangesAsync();
+            return HandleResult(Result<string>.Success("Change Select Success"));
         }
 
         //[HttpDelete("DeleteItemToCart")]

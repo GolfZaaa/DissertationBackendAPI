@@ -12,6 +12,7 @@ public class CartItem
     public DateTime EndTime { get; set; }
     public int CountPeople { get; set; }
     public string Objectives { get; set; }
+    public bool Selected { get; set; }
 
 }
 

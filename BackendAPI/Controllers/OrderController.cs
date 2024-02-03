@@ -283,8 +283,9 @@ namespace BackendAPI.Controllers
 
             foreach (var item in cart.Items)
             {
-
-                var locationtest = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == item.Locations.Id);
+                if (item.Selected)
+                {
+                    var locationtest = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == item.Locations.Id);
 
                 if (locationtest == null || locationtest.Category == null)
                 {
@@ -340,12 +341,28 @@ namespace BackendAPI.Controllers
                     CountPeople = item.CountPeople,
                 };
                 order.OrderItems.Add(orderItem);
+                }
             }
             order.TotalPrice = order.GetTotalAmount();
             _dataContext.ReservationsOrders.Add(order);
 
-            _dataContext.Carts.Remove(cart);
-            _dataContext.CartItems.RemoveRange(cart.Items);
+
+            var selectedCartItems = cart.Items.Where(item => item.Selected).ToList();
+
+            foreach (var item in selectedCartItems)
+            {
+                cart.Items.Remove(item);
+            }
+
+            _dataContext.CartItems.RemoveRange(selectedCartItems);
+
+            if (cart.Items.Count == 0)
+            {
+                _dataContext.Carts.Remove(cart);
+            }
+
+            //_dataContext.Carts.Remove(cart);
+            //_dataContext.CartItems.RemoveRange(cart.Items);
             await _dataContext.SaveChangesAsync();
 
             if (dto.PaymentMethod == DTOs.OrderDtos.PaymentMethod.CreditCard)
@@ -367,63 +384,63 @@ namespace BackendAPI.Controllers
             }
             await _dataContext.SaveChangesAsync();
 
-            var orderItemsHtml = "";
+    //        var orderItemsHtml = "";
 
-            foreach (var item in order.OrderItems)
-            {
-                orderItemsHtml += $@"
-                    <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
-                        <p><strong>Location:</strong> {item.Location.Name}</p>
-                        <p><strong>StartTime:</strong> {item.StartTime}</p>
-                        <p><strong>EndTime:</strong> {item.EndTime}</p>
-                        <p><strong>Price:</strong> {item.Price}</p>
-                    </div>";
-            }
-
-
-            var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
-            var to = new EmailAddress(checkuser.Email);
-            var subject = "Order Confirmation";
-            var htmlContent = $@"
-    <div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
-        <div style=""text-align: center;"">
-            <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 100px; margin-bottom: 20px;"">
-            <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
-            <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
-        </div>
-
-        <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
-
-        <div style=""margin-bottom: 20px;"">
-            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Details</h3>
-            <p><strong>Order ID:</strong> {order.Id}</p>
-            <p><strong>Order Date:</strong> {order.OrderDate}</p>
-        </div>
-
-        <div style=""margin-bottom: 20px;"">
-            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Personal Information</h3>
-            <p>{checkuser.FirstName}, {checkuser.LastName}, {checkuser.PhoneNumber}</p>
-        </div>
-
-        <div style=""margin-bottom: 20px;"">
-            <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Items</h3>
-            {orderItemsHtml}
-        </div>
-
-        <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
-
-        <div style=""text-align: right;"">
-            <p style=""font-size: 18px; color: #333;""><strong>Total Amount:</strong> {order.TotalPrice}</p>
-        </div>
-
-        <div style=""text-align: center; margin-top: 20px;"">
-            <p style=""font-size: 16px; color: #666;"">Thank you for your purchase!</p>
-          </div>
-            </div>";
+    //        foreach (var item in order.OrderItems)
+    //        {
+    //            orderItemsHtml += $@"
+    //                <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
+    //                    <p><strong>Location:</strong> {item.Location.Name}</p>
+    //                    <p><strong>StartTime:</strong> {item.StartTime}</p>
+    //                    <p><strong>EndTime:</strong> {item.EndTime}</p>
+    //                    <p><strong>Price:</strong> {item.Price}</p>
+    //                </div>";
+    //        }
 
 
-            var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
-            await _sendGridClient.SendEmailAsync(emailMessage);
+    //        var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
+    //        var to = new EmailAddress(checkuser.Email);
+    //        var subject = "Order Confirmation";
+    //        var htmlContent = $@"
+    //<div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
+    //    <div style=""text-align: center;"">
+    //        <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 100px; margin-bottom: 20px;"">
+    //        <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
+    //        <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
+    //    </div>
+
+    //    <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+
+    //    <div style=""margin-bottom: 20px;"">
+    //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Details</h3>
+    //        <p><strong>Order ID:</strong> {order.Id}</p>
+    //        <p><strong>Order Date:</strong> {order.OrderDate}</p>
+    //    </div>
+
+    //    <div style=""margin-bottom: 20px;"">
+    //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Personal Information</h3>
+    //        <p>{checkuser.FirstName}, {checkuser.LastName}, {checkuser.PhoneNumber}</p>
+    //    </div>
+
+    //    <div style=""margin-bottom: 20px;"">
+    //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Items</h3>
+    //        {orderItemsHtml}
+    //    </div>
+
+    //    <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+
+    //    <div style=""text-align: right;"">
+    //        <p style=""font-size: 18px; color: #333;""><strong>Total Amount:</strong> {order.TotalPrice}</p>
+    //    </div>
+
+    //    <div style=""text-align: center; margin-top: 20px;"">
+    //        <p style=""font-size: 16px; color: #666;"">Thank you for your purchase!</p>
+    //      </div>
+    //        </div>";
+
+
+    //        var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
+    //        await _sendGridClient.SendEmailAsync(emailMessage);
 
 
             return Ok(order);
