@@ -74,7 +74,7 @@ namespace BackendAPI.Controllers
         [HttpGet("GetCategoryById")]
         public async Task<ActionResult> GetCategoryById (int id)
         {
-            var result = await _dataContext.CategoryLocations.Include(x => x.Locations).FirstOrDefaultAsync(x => x.Id == id);
+            var result = await _dataContext.CategoryLocations.Include(x => x.Locations).ThenInclude(x=>x.locationImages).FirstOrDefaultAsync(x => x.Id == id);
             
             if(result == null )
             {

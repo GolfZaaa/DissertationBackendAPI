@@ -215,6 +215,46 @@ public class AccountController : BaseApiController
     }
 
 
+    [HttpPost("TurnOnOffUser")]
+    public async Task<ActionResult> TurnOnOffUser(TurnOnOffAccountDto dto)
+    {
+        var account = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id == dto.Id);
+        if (account == null)
+        {
+            HandleResult(Result<string>.Failure("Not Found Account"));
+        }
+
+        if (dto.StatusOnOff == 0)
+        {
+            account.StatusOnOff = 0;
+        }
+        else
+        {
+            account.StatusOnOff = 1;
+        }
+        await _dataContext.SaveChangesAsync();
+        return Ok(account);
+    }
+
+
+    [HttpPost("DeleteRoleUser")]
+    public async Task<ActionResult> DeleteRoleUser(DeleteRoleUserDto dto)
+    {
+        var role = await _dataContext.Roles.FirstOrDefaultAsync(x => x.Name == dto.roleName);
+        if (role == null)
+            return HandleResult(Result<string>.Failure("Cannot Found Role"));
+
+        var user = await _userManager.FindByIdAsync(dto.userId);
+        if (user == null)
+            return HandleResult(Result<string>.Failure("Cannot Found User"));
+
+        var result = await _userManager.RemoveFromRoleAsync(user, role.Name);
+        if (result.Succeeded)
+            return HandleResult(Result<string>.Success("Successfully User removed from role"));
+        else
+            return HandleResult(Result<string>.Failure("Failed to remove user from role"));
+    }
+
 
 
 

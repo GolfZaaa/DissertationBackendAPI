@@ -44,16 +44,13 @@ namespace BackendAPI.Services
             if (user == null)
                 return Result<string>.Failure("User not found.");
 
-            // ตรวจสอบว่ามี Role นี้หรือไม่
             var role = await _roleManager.FindByIdAsync(dto.RoleId);
             if (role == null)
                 return Result<string>.Failure("Role not found.");
 
-            // ตรวจสอบว่าผู้ใช้มี Role นี้อยู่แล้วหรือไม่
             if (await _userManager.IsInRoleAsync(user, role.Name))
                 return Result<string>.Failure("User already has this role.");
 
-            // เพิ่ม Role ให้กับผู้ใช้
             var result = await _userManager.AddToRoleAsync(user, role.Name);
 
             if (result.Succeeded)
@@ -142,6 +139,8 @@ namespace BackendAPI.Services
             }
 
             if (!user.EmailConfirmed)return Result<object>.Failure("Please confirm your email for the first login.");
+
+            if (user.StatusOnOff == 0) return Result<object>.Failure("Admin block user already");
 
             var userId = await _userManager.GetUserIdAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
@@ -252,9 +251,14 @@ namespace BackendAPI.Services
                 PhoneNumber = user.PhoneNumber,
                 AgencyName = GetAgencyName(user.AgencyId).Result,
                 StatusOnOff = user.StatusOnOff,
-                RoleConcurrencyStamps = _userManager.GetRolesAsync(user).Result
-            .Select(role => _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp)
-            .ToList(),
+                //    RoleConcurrencyStamps = _userManager.GetRolesAsync(user).Result
+                //.Select(role => _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp)
+                //.ToList(),
+                RoleConcurrencyStamps = _userManager.GetRolesAsync(user).Result.Select(role => new
+                {
+                    RoleName = role,
+                    ConcurrencyStamp = _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp
+                }).ToList()
             }).ToList<object>();
 
             return Result<List<object>>.Success(usersWithRoles);
