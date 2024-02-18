@@ -27,18 +27,16 @@ public class LocationController : BaseApiController
     {
         var validator = new LocationRequestValidator();
         var result = validator.Validate(dto);
-
         if (!result.IsValid)
         {
             var errors = result.Errors.Select(error => error.ErrorMessage).ToList();
             return BadRequest(new { Message = "Validation Create Error", Errors = errors });
         }
-
         return HandleResult(await _locationService.CreateLocationAsync(dto));
     }
 
-    [HttpPost("Update LocationsService")]
-    public async Task<ActionResult> UpdateLocation([FromForm] LocationRequest dto)
+    [HttpPost("UpdateLocationsService")]
+    public async Task<ActionResult> UpdateLocation([FromForm] UpdateLocationDto dto)
     {
         return HandleResult(await _locationService.UpdateLocationAsync(dto));
     }
@@ -72,6 +70,12 @@ public class LocationController : BaseApiController
             HandleResult(Result<string>.Failure("Not Found Location"));
         }
 
+        var locationReservationCount = await _dataContext.ReservationsOrderItems.CountAsync(x => x.LocationId == location.Id);
+        if (locationReservationCount > 0)
+        {
+            return BadRequest("Cannot change status. Location is in use by users.");
+        }
+
         if (dto.StatusOnOff == 0)
         {
             location.StatusOnOff = 0;
@@ -81,6 +85,27 @@ public class LocationController : BaseApiController
             location.StatusOnOff = 1;
         }
         await _dataContext.SaveChangesAsync();
+        return Ok(location);
+    }
+
+
+
+    [HttpGet("GetLocationStatus")]
+    public async Task<ActionResult> GetLocationStatus()
+    {
+        //var result = await _dataContext.Locations.Include(x => x.Category).Include(a => a.locationImages).OrderByDescending(x => x.Id).ToListAsync();
+        //if (result == null || result.Count == 0)
+        //{
+        //    return Result<List<Location>>.Failure("Notfound Location");
+        //}
+        //return Result<List<Location>>.Success(result);
+
+
+        var location = await _dataContext.Locations.Where(x => x.StatusOnOff == 1).Include(x=>x.Category).Include(a=>a.locationImages).OrderByDescending(x=>x.Id).ToListAsync();
+        if (location == null)
+        {
+            HandleResult(Result<string>.Failure("Not Found Location"));
+        }
         return Ok(location);
     }
 

@@ -29,8 +29,6 @@ namespace BackendAPI.Controllers
             _memoryCache = memoryCache;
         }
 
-
-
         //[HttpPost("CreateReservations AddToCart")]
         //public async Task<ActionResult> CreateReservations(ReservationsDto dto)
         //{
@@ -101,7 +99,6 @@ namespace BackendAPI.Controllers
         //}
 
 
-
         [HttpPost("AddToCart")]
         public async Task<object> AddItemToCartAsync(AddCartDTO dto)
         {
@@ -114,27 +111,15 @@ namespace BackendAPI.Controllers
                 return HandleResult(Result<string>.Failure("User not found"));
             }
 
-            //var locationstatus = await _dataContext.Carts.Where(x => x.User.Id == dto.userId)
-            //    .SelectMany(x => x.Items).Where(x => x.Locations.Id == dto.LocationId)
-            //    .Select(x => x.Locations.Id).FirstOrDefaultAsync();
-
-            //if(locationstatus !=0)
-            //{
-            //    return HandleResult(Result<string>.Failure("LocationId is already in the cart"));
-            //}
 
             var location = await _dataContext.Locations.Include(x => x.Category).FirstOrDefaultAsync(l => l.Id == dto.LocationId);
 
             if (location == null)
                 return HandleResult(Result<string>.Failure("Location not found"));
 
-            if (location.Status == 0)
-            {
-                return HandleResult(Result<string>.Failure("The room is not available"));
-            }
 
             var checkReservation = await _dataContext.ReservationsOrderItems
-                  .Where(x => x.LocationId == dto.LocationId && x.StatusFinished == 1 &&
+                  .Where(x => x.LocationId == dto.LocationId && (x.StatusFinished == 0 ||x.StatusFinished == 1 || x.StatusFinished == 2 || x.StatusFinished == 3) &&
                 ((dto.StartTime >= x.StartTime && dto.StartTime < x.EndTime) ||
                  (dto.EndTime > x.StartTime && dto.EndTime <= x.EndTime) ||
                  (x.StartTime >= dto.StartTime && x.StartTime < dto.EndTime) ||
@@ -193,9 +178,6 @@ namespace BackendAPI.Controllers
                 return HandleResult(Result<string>.Success("Fail Add Product to Cart"));
             }
         }
-
-
-
         private async Task<Cart> RetrieveCart(string accountId)
         {
             var cart = await _dataContext.Carts
@@ -204,7 +186,6 @@ namespace BackendAPI.Controllers
                    .SingleOrDefaultAsync(x => x.User.Id == accountId);
             return cart;
         }
-
 
         [HttpGet("GetCartByID")]
         public async Task<object> GetCartItemsByUserIdAsync(string userId)
@@ -452,10 +433,6 @@ namespace BackendAPI.Controllers
         //}
 
         //private string GenerateID() => Guid.NewGuid().ToString("N");
-
-
-
-
 
     }
 }

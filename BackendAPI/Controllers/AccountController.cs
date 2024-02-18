@@ -12,10 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using SendGrid;
-using System.IO;
-using System.Security.Claims;
 
 namespace BackendAPI.Controllers;
 public class AccountController : BaseApiController

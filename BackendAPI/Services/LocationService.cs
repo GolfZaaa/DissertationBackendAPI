@@ -77,7 +77,7 @@ public class LocationService : ILocationService
         _dataContext.Locations.Add(map);
         await _dataContext.SaveChangesAsync();
 
-        return Result<string>.Success($"Create Location Success {map.Image}");
+        return Result<string>.Success("Create Location Success");
     }
 
     public async Task<Result<string>> DeleteLocationAsync(int id)
@@ -100,7 +100,7 @@ public class LocationService : ILocationService
         }
          _dataContext.Locations.Remove(location);
         await _dataContext.SaveChangesAsync();
-        return Result<string>.Success($"Delete Location ID {id} Success");
+        return Result<string>.Success("Delete Location Success");
     }
     public async Task<Result<Location>> GetByIdAsync(int id)
     {
@@ -120,7 +120,7 @@ public class LocationService : ILocationService
         return Result<List<Location>>.Success(result);
     }
 
-    public async Task<Result<string>> UpdateLocationAsync([FromForm] LocationRequest dto)
+    public async Task<Result<string>> UpdateLocationAsync([FromForm] UpdateLocationDto dto)
     {
         var findLocation = await _dataContext.Locations.FindAsync(dto.Id);
         if (findLocation == null)
@@ -135,10 +135,13 @@ public class LocationService : ILocationService
             return Result<string>.Failure("Category Not Found.");
         }
 
-        if (_dataContext.Locations.Any(x => x.Name == dto.Name))
+        if (dto.Name != null && dto.Name != findLocation.Name)
         {
-            return Result<string>.Failure("Location Name is already in use.");
+            if (_dataContext.Locations.Any(x => x.Name == dto.Name))
+                return Result<string>.Failure("Location name have already");
+            findLocation.Name = dto.Name;
         }
+
 
         // ตรวจสอบและอัพโหลดไฟล์
         (string errorMessage, List<string> imageNames) = await UploadImageAsync(dto.FormFiles);
@@ -154,6 +157,7 @@ public class LocationService : ILocationService
         //var OldImage = _dataContext.Locations.Where(a => a.Id == dto.Id).Select(x => x.Image).FirstOrDefaultAsync();
         string imageFileName = "";
         string uploadDirectory = "wwwroot/LocationImage";
+
         if (dto.Image != null)
         {
             string filePathToDelete = Path.Combine(uploadDirectory, findLocation.Image);
@@ -165,26 +169,37 @@ public class LocationService : ILocationService
             imageFileName = "Lo_" + Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
             var imagePath = Path.Combine(uploadDirectory, imageFileName);
 
-            var map = _mapper.Map(dto, findLocation); // ใช้ Mapper เพื่อแม็ปข้อมูลใหม่ลงใน findLocation
 
             using (var stream = new FileStream(imagePath, FileMode.Create))
             {
                 await dto.Image.CopyToAsync(stream);
             }
-            map.Image = imageFileName;
-            map.Category = existingCategory;
 
+            findLocation.Image = imageFileName;
         }
+        else
+        {
+            var response = new UpdateLocationDto
+            {
+
+                Id = dto.Id,
+                Name = dto.Name,
+                Capacity = dto.Capacity,
+                PlaceDescription = dto.PlaceDescription,
+                CategoryId = dto.CategoryId,
+            };
+            findLocation.Image = findLocation.Image;
+        }
+
         if (imageNames.Count > 0)
         {
             var newImages = imageNames.Select(image => new LocationImages { Image = image }).ToList();
 
             findLocation.locationImages.AddRange(newImages);
         }
-        //findLocation.Image = imageNames;
         await _dataContext.SaveChangesAsync();
 
-        return Result<string>.Success($"Update Location Success: {findLocation.Image}");
+        return Result<string>.Success("Update Location Success");
     }
 
     //[HttpPost("TestDeleteFile")]
@@ -213,7 +228,6 @@ public class LocationService : ILocationService
     //        return StatusCode(500, $"An error occurred: {ex.Message}");
     //    }
     //}
-
 
     public async Task<(string errorMessage, List<string> imageNames)> UploadImageAsync(IFormFileCollection formFiles)
     {

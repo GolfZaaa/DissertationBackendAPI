@@ -54,9 +54,9 @@ namespace BackendAPI.Services
             {
                 Name = dto.Name,
                 DateTimeCreate = DateTime.Now,
-                Servicefees = dto.Servicefees,
                 Image = imageFileName,
-                Detail = dto.Detail
+                Detail = dto.Detail,
+                Servicefees = dto.Servicefees,
             };
             _dataContext.Add(category);
             await _dataContext.SaveChangesAsync();
@@ -98,7 +98,8 @@ namespace BackendAPI.Services
                 find.Servicefees = dto.Servicefees;
             }
 
-            if(dto.Detail != null)
+
+            if (dto.Detail != null)
             {
                 find.Detail = dto.Detail;
             }

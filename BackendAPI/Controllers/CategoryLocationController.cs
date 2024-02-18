@@ -3,6 +3,7 @@ using BackendAPI.Data;
 using BackendAPI.DTOs;
 using BackendAPI.DTOs.CategoryDtos;
 using BackendAPI.DTOs.RoomsDto;
+using BackendAPI.Models;
 using BackendAPI.Services;
 using BackendAPI.Services.IServices;
 using FluentValidation;
@@ -33,15 +34,6 @@ namespace BackendAPI.Controllers
         [HttpPost("CreateCategoryService")]
         public async Task<IActionResult> CreateCategory([FromForm]CreateCategoryDto dto)
         {
-            var Create = new CreateCategoryDtoValidator();
-            var result = Create.Validate(dto);
-
-            if (!result.IsValid)
-            {
-                var errors = result.Errors.Select(error => error.ErrorMessage).ToList();
-                return BadRequest(new { Message = "Validation Create Error", Errors = errors });
-            }
-
             return HandleResult(await _categoryLocationService.CreateCategoryAsync(dto));
         }
 
@@ -75,17 +67,15 @@ namespace BackendAPI.Controllers
         public async Task<ActionResult> GetCategoryById (int id)
         {
             var result = await _dataContext.CategoryLocations.Include(x => x.Locations).ThenInclude(x=>x.locationImages).FirstOrDefaultAsync(x => x.Id == id);
-            
             if(result == null )
             {
                 return HandleResult(Result<string>.Failure("NotFound Category"));
             }
-
             // ดึง Locations ที่มี Category เดียวกับ parameter
             var locations = result.Locations;
-
             return Ok(new { Category = result, Locations = locations });
         }
+
 
 
         [HttpPost("TurnOnOffCategory")]
@@ -97,7 +87,13 @@ namespace BackendAPI.Controllers
                 HandleResult(Result<string>.Failure("Not Found Category"));
             }
 
-            if(dto.StatusOnOff == 0)
+            var categoryUsersCount = await _dataContext.Locations.CountAsync(u => u.Id == category.Id);
+            if (categoryUsersCount > 0)
+            {
+                return BadRequest("Cannot change status. Category is in use by users.");
+            }
+
+            if (dto.StatusOnOff == 0)
             {
                 category.StatusOnOff = 0;
             }
@@ -109,10 +105,14 @@ namespace BackendAPI.Controllers
             return Ok(category);
         }
 
+
+
+
         [HttpGet("GetCategoryStatus")]
         public async Task<ActionResult> GetCategoryStatus ()
         {
-            var category = await _dataContext.CategoryLocations.Where(x => x.StatusOnOff == 1).ToListAsync();
+            var category = await _dataContext.CategoryLocations.Where(x => x.StatusOnOff == 1 && x.Servicefees != 0).ToListAsync();
+
             if(category == null)
             {
                 HandleResult(Result<string>.Failure("Not Found Category"));
@@ -121,6 +121,19 @@ namespace BackendAPI.Controllers
             return Ok(category);
         }
 
+
+        //[HttpGet("GetCategoryStatusServicefeesforday")]
+        //public async Task<ActionResult> GetCategoryStatusServicefeesforday()
+        //{
+        //    var category = await _dataContext.CategoryLocations.Where(x => x.StatusOnOff == 1 && x.Servicefeesforday != 0).ToListAsync();
+
+        //    if (category == null)
+        //    {
+        //        HandleResult(Result<string>.Failure("Not Found Category"));
+        //    }
+
+        //    return Ok(category);
+        //}
 
     }
 }

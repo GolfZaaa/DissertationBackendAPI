@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240218102135_init1")]
+    partial class init1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -307,30 +310,6 @@ namespace BackendAPI.Migrations
                     b.ToTable("LoginAttempts");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.MembershipPrice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("MembershipPrices");
-                });
-
             modelBuilder.Entity("BackendAPI.Models.ReservationsOrder", b =>
                 {
                     b.Property<int>("Id")
@@ -413,10 +392,6 @@ namespace BackendAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CreateBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("ExpirationTime")
                         .HasColumnType("datetime2");
 
@@ -441,10 +416,6 @@ namespace BackendAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CreateBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
@@ -493,35 +464,35 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2768673d-9e20-4451-9349-003af7259740",
+                            Id = "0a891df9-5564-4085-b59c-6990d1697c25",
                             ConcurrencyStamp = "นักศึกษา",
                             Name = "Student",
                             NormalizedName = "Student"
                         },
                         new
                         {
-                            Id = "86620432-18da-4579-9a85-310ae00377e8",
+                            Id = "db10f34e-a751-4054-aceb-904cbcb143b6",
                             ConcurrencyStamp = "อาจารย์",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "22e04da6-9c0d-4474-bf4d-6e948bef2cab",
+                            Id = "237a4478-29a6-4ea1-8711-44924d26072a",
                             ConcurrencyStamp = "บุคคลภายนอก",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "84fbdaa5-01b7-430a-b478-3f1327147787",
+                            Id = "5599ceb3-1800-44b2-b413-c3e9960529fe",
                             ConcurrencyStamp = "ผู้อนุมัติ",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "bba4d0da-7072-4c7c-80cd-8a761e0ae99f",
+                            Id = "1c17075b-d463-40b9-a79e-fda949f13c20",
                             ConcurrencyStamp = "ผู้ดูแลระบบ",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
@@ -676,17 +647,6 @@ namespace BackendAPI.Migrations
                         .WithMany("locationImages")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.MembershipPrice", b =>
-                {
-                    b.HasOne("BackendAPI.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.ReservationsOrderItem", b =>

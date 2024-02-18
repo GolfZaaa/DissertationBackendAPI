@@ -9,7 +9,6 @@ namespace BackendAPI.Services.IServices
         Task<Result<List<object>>> GetRoleAsync();
         Task<Result<string>> CreateRoleAsync(RoleDto roleDto);
         Task<Result<string>> UpdateRoleAsync(RoleUpdateDto roleUpdateDto);
-        Task<Result<string>> DeleteRoleAsync(RoleDto roleDto);
-
+        Task<Result<string>> DeleteRoleAsync(string id);
     }
 }

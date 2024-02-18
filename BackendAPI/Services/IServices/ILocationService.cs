@@ -9,7 +9,7 @@ namespace BackendAPI.Services.IServices;
     Task<Result<string>> CreateLocationAsync(LocationRequest dto);
     Task<Result<List<Location>>> ShowLocationAsync();
     Task<Result<string>> DeleteLocationAsync(int id);
-    Task<Result<string>> UpdateLocationAsync([FromForm] LocationRequest dto);
+    Task<Result<string>> UpdateLocationAsync([FromForm] UpdateLocationDto dto);
     Task<Result<Location>> GetByIdAsync(int id);
     Task<(string errorMessage, List<string> imageNames)> UploadImageAsync(IFormFileCollection formFiles);
 }

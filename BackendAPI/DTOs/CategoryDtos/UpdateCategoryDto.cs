@@ -7,7 +7,7 @@ namespace BackendAPI.DTOs.CategoryDtos;
         public int Id { get; set; }
         public string Name { get; set; }
         public int Servicefees { get; set; }
-        public string Detail { get; set; }
+    public string Detail { get; set; }
     public IFormFile? Image { get; set; }
 }
 

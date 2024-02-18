@@ -29,7 +29,7 @@ namespace BackendAPI.Controllers
             var agency = new Agency
             {
                 Name = dto.Name,
-                CreatedDate = dto.CreatedDate,
+                CreatedDate = DateTime.Now,
             };
             _dataContext.Add(agency);
             await _dataContext.SaveChangesAsync();
@@ -51,6 +51,8 @@ namespace BackendAPI.Controllers
             var find = await _dataContext.Agencys.FindAsync(dto.Id);
 
             if (find == null) return HandleResult(Result<string>.Failure("Not Found AgentID "));
+
+            if (find.Name == dto.Name) return HandleResult(Result<string>.Failure("The current name of the organization."));
 
             if (_dataContext.Agencys.Any(x => x.Name == dto.Name))
                 return HandleResult(Result<string>.Failure("Agency name have already"));
@@ -91,6 +93,44 @@ namespace BackendAPI.Controllers
             return HandleResult(Result<object>.Success(result));
         }
 
+
+        [HttpPost("TurnOnOffAgency")]
+        public async Task<ActionResult> TurnOnOffAgency(TurnOnOffAgencyDto dto)
+        {
+            var agency = await _dataContext.Agencys.FirstOrDefaultAsync(x => x.Id == dto.Id);
+            if (agency == null)
+            {
+                HandleResult(Result<string>.Failure("Not Found Agency"));
+            }
+
+            var agencyUsersCount = await _dataContext.Users.CountAsync(u => u.AgencyId == agency.Id);
+            if (agencyUsersCount > 0)
+            {
+                return BadRequest("Cannot change status. Agency is in use by users.");
+            }
+
+            if (dto.StatusOnOff == 0)
+            {
+                agency.StatusOnOff = 0;
+            }
+            else
+            {
+                agency.StatusOnOff = 1;
+            }
+            await _dataContext.SaveChangesAsync();
+            return Ok(agency);
+        }
+
+        [HttpGet("GetAgencyStatus")]
+        public async Task<ActionResult> GetAgencyStatus()
+        {
+            var Agency = await _dataContext.Agencys.Where(x => x.StatusOnOff == 1).ToListAsync();
+            if (Agency == null)
+            {
+                HandleResult(Result<string>.Failure("Not Found Agency"));
+            }
+            return Ok(Agency);
+        }
 
     }
 }

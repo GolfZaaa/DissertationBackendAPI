@@ -4,6 +4,7 @@ using BackendAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240218131152_init2")]
+    partial class init2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -307,30 +310,6 @@ namespace BackendAPI.Migrations
                     b.ToTable("LoginAttempts");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.MembershipPrice", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LocationId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LocationId");
-
-                    b.ToTable("MembershipPrices");
-                });
-
             modelBuilder.Entity("BackendAPI.Models.ReservationsOrder", b =>
                 {
                     b.Property<int>("Id")
@@ -493,35 +472,35 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2768673d-9e20-4451-9349-003af7259740",
+                            Id = "146abf8c-2f88-42da-8454-f036078e0be7",
                             ConcurrencyStamp = "นักศึกษา",
                             Name = "Student",
                             NormalizedName = "Student"
                         },
                         new
                         {
-                            Id = "86620432-18da-4579-9a85-310ae00377e8",
+                            Id = "382ed985-cfdf-48b7-81e0-5c1c0eca80d1",
                             ConcurrencyStamp = "อาจารย์",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "22e04da6-9c0d-4474-bf4d-6e948bef2cab",
+                            Id = "0612d3e2-03eb-40ce-b75d-ba32d6244606",
                             ConcurrencyStamp = "บุคคลภายนอก",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "84fbdaa5-01b7-430a-b478-3f1327147787",
+                            Id = "d13bde67-4367-4409-8859-9431fbee8d76",
                             ConcurrencyStamp = "ผู้อนุมัติ",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "bba4d0da-7072-4c7c-80cd-8a761e0ae99f",
+                            Id = "00bb4d14-96e1-4ad0-b1b0-4b0f1382fa39",
                             ConcurrencyStamp = "ผู้ดูแลระบบ",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
@@ -676,17 +655,6 @@ namespace BackendAPI.Migrations
                         .WithMany("locationImages")
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.MembershipPrice", b =>
-                {
-                    b.HasOne("BackendAPI.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.ReservationsOrderItem", b =>

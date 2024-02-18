@@ -1,4 +1,5 @@
 ﻿using BackendAPI.Core;
+using BackendAPI.Data;
 using BackendAPI.DTOs.AccountDtos;
 using BackendAPI.DTOs.RolesDtos;
 using BackendAPI.Models;
@@ -13,10 +14,12 @@ namespace BackendAPI.Controllers
     public class RoleController : BaseApiController
     {
         private readonly IRoleService _roleService;
+        private readonly DataContext _dataContext;
 
-        public RoleController(IRoleService roleService)
+        public RoleController(IRoleService roleService, DataContext dataContext)
         {
             _roleService = roleService;
+            _dataContext = dataContext;
         }
 
         [HttpGet("ShowRolesService")]
@@ -38,32 +41,17 @@ namespace BackendAPI.Controllers
             return HandleResult(await _roleService.CreateRoleAsync(dto));
         }
 
-
         [HttpPut("UpdateRoleService")]
         public async Task<ActionResult> Update(RoleUpdateDto dto)
         {
-            var validator = new RoleUpdateValidator();
-            var resultvalidate = validator.Validate(dto);
-            if (!resultvalidate.IsValid)
-            {
-                var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
-                return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
-            }
             return HandleResult(await _roleService.UpdateRoleAsync(dto));
         }
 
 
         [HttpDelete("DeleteRoleService")]
-        public async Task<IActionResult> Delete(RoleDto dto)
+        public async Task<IActionResult> Delete(string id)
         {
-            var validator = new RoleValidator();
-            var resultvalidate = validator.Validate(dto);
-            if (!resultvalidate.IsValid)
-            {
-                var errors = resultvalidate.Errors.Select(x => x.ErrorMessage).ToList();
-                return BadRequest(new { Message = "Validation Change Email is Emtry", Errors = errors });
-            }
-            return HandleResult (await _roleService.DeleteRoleAsync(dto));
+            return HandleResult (await _roleService.DeleteRoleAsync(id));
         }
     }
 }

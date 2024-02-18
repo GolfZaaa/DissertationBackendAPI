@@ -14,7 +14,6 @@ namespace BackendAPI.Data
         {
             base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseSqlServer("Server=DESKTOP-DTGB06O\\SQLEXPRESS; Database=Dissertation; Trusted_connection=true; TrustServerCertificate=true");
-
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -40,11 +39,11 @@ namespace BackendAPI.Data
 
             builder.Entity<IdentityRole>()
             .HasData(
-                new IdentityRole { Name = "Student", NormalizedName = "Student", ConcurrencyStamp = "นักศึกษา" },
-                new IdentityRole { Name = "Professor", NormalizedName = "Professor", ConcurrencyStamp = "อาจารย์" },
-                new IdentityRole { Name = "Outsider", NormalizedName = "Outsider", ConcurrencyStamp = "บุคคลภายนอก" },
-                new IdentityRole { Name = "Approver", NormalizedName = "Approver", ConcurrencyStamp = "ผู้อนุมัติ" },
-                new IdentityRole { Name = "Administrator", NormalizedName = "Administrator", ConcurrencyStamp = "ผู้ดูแลระบบ" }
+                new IdentityRole { Name = "Student", NormalizedName = "Student", ConcurrencyStamp = "นักศึกษา"},
+                new IdentityRole { Name = "Professor", NormalizedName = "Professor", ConcurrencyStamp = "อาจารย์"},
+                new IdentityRole { Name = "Outsider", NormalizedName = "Outsider", ConcurrencyStamp = "บุคคลภายนอก"},
+                new IdentityRole { Name = "Approver", NormalizedName = "Approver", ConcurrencyStamp = "ผู้อนุมัติ"},
+                new IdentityRole { Name = "Administrator", NormalizedName = "Administrator", ConcurrencyStamp = "ผู้ดูแลระบบ"}
             );
 
             builder.Entity<Cart>(options =>
@@ -69,6 +68,10 @@ namespace BackendAPI.Data
         public DbSet<Cart> Carts { get; set; }
         public DbSet<ReservationsOrderItem> ReservationsOrderItems { get; set; }
         public DbSet<Agency> Agencys { get; set; }
+        public DbSet<WalkInTransaction> WalkInTransactions { get; set; }
+        public DbSet<WalkInMembership> WalkInMemberships { get; set; }
+        //public DbSet<MembershipPrice> MembershipPrices { get; set; }
+
 
     }
 

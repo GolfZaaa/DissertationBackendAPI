@@ -19,7 +19,6 @@ public class ReservationsOrder
     public int Id { get; set; }
     public string UserId { get; set; }
     public string? OrderImage { get; set; }
-    public long TotalPrice { get; set; }
     public DateTime OrderDate { get; set; }
 
     [JsonIgnore]
