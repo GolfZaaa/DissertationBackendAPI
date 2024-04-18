@@ -325,7 +325,7 @@ namespace BackendAPI.Controllers
 
 
                 var checkReservation = await _dataContext.ReservationsOrderItems
-                      .Where(x => x.LocationId == item.Locations.Id && (x.StatusFinished == 0 || x.StatusFinished == 1 || x.StatusFinished == 2 || x.StatusFinished == 3) &&
+                      .Where(x => x.LocationId == item.Locations.Id && (x.StatusFinished == 0 || x.StatusFinished == 1 || x.StatusFinished == 2) &&
                     ((item.StartTime >= x.StartTime && item.StartTime < x.EndTime) ||
                      (item.EndTime > x.StartTime && item.EndTime <= x.EndTime) ||
                      (x.StartTime >= item.StartTime && x.StartTime < item.EndTime) ||
@@ -347,18 +347,37 @@ namespace BackendAPI.Controllers
 
                 var price = totalRoundedHours * (long)locationtest.Category.Servicefees;
 
-                var orderItem = new ReservationsOrderItem
-                {
-                    LocationId = item.Locations.Id,
-                    Price = price,
-                    ReservationsOrder = order,
-                    StartTime = item.StartTime,
-                    EndTime = item.EndTime,
-                    StatusFinished = 1,
-                    Objectives = item.Objectives,
-                    CountPeople = item.CountPeople,
-                };
-                order.OrderItems.Add(orderItem);
+                if(dto.OrderImage != null)
+                    {
+                        var orderItem = new ReservationsOrderItem
+                        {
+                            LocationId = item.Locations.Id,
+                            Price = price,
+                            ReservationsOrder = order,
+                            StartTime = item.StartTime,
+                            EndTime = item.EndTime,
+                            StatusFinished = 6,
+                            Objectives = item.Objectives,
+                            CountPeople = item.CountPeople,
+                        };
+                        order.OrderItems.Add(orderItem);
+                    }
+                    else
+                    {
+                        var orderItem = new ReservationsOrderItem
+                        {
+                            LocationId = item.Locations.Id,
+                            Price = price,
+                            ReservationsOrder = order,
+                            StartTime = item.StartTime,
+                            EndTime = item.EndTime,
+                            StatusFinished = 1,
+                            Objectives = item.Objectives,
+                            CountPeople = item.CountPeople,
+                        };
+                        order.OrderItems.Add(orderItem);
+                    }
+
                 }
             }
             _dataContext.ReservationsOrders.Add(order);
@@ -401,63 +420,61 @@ namespace BackendAPI.Controllers
             }
             await _dataContext.SaveChangesAsync();
 
-            //        var orderItemsHtml = "";
+            var orderItemsHtml = "";
 
-            //        foreach (var item in order.OrderItems)
-            //        {
-            //            orderItemsHtml += $@"
-            //                <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
-            //                    <p><strong>Location:</strong> {item.Location.Name}</p>
-            //                    <p><strong>StartTime:</strong> {item.StartTime}</p>
-            //                    <p><strong>EndTime:</strong> {item.EndTime}</p>
-            //                    <p><strong>Price:</strong> {item.Price}</p>
-            //                </div>";
-            //        }
-
-
-            //        var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
-            //        var to = new EmailAddress(checkuser.Email);
-            //        var subject = "Order Confirmation";
-            //        var htmlContent = $@"
-            //<div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
-            //    <div style=""text-align: center;"">
-            //        <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 100px; margin-bottom: 20px;"">
-            //        <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">Order Receipt</h2>
-            //        <p style=""font-size: 16px; color: #666;"">Thank you for shopping with us!</p>
-            //    </div>
-
-            //    <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
-
-            //    <div style=""margin-bottom: 20px;"">
-            //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Details</h3>
-            //        <p><strong>Order ID:</strong> {order.Id}</p>
-            //        <p><strong>Order Date:</strong> {order.OrderDate}</p>
-            //    </div>
-
-            //    <div style=""margin-bottom: 20px;"">
-            //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Personal Information</h3>
-            //        <p>{checkuser.FirstName}, {checkuser.LastName}, {checkuser.PhoneNumber}</p>
-            //    </div>
-
-            //    <div style=""margin-bottom: 20px;"">
-            //        <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">Order Items</h3>
-            //        {orderItemsHtml}
-            //    </div>
-
-            //    <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
-
-            //    <div style=""text-align: right;"">
-            //        <p style=""font-size: 18px; color: #333;""><strong>Total Amount:</strong> {order.GetTotalAmount}</p>
-            //    </div>
-
-            //    <div style=""text-align: center; margin-top: 20px;"">
-            //        <p style=""font-size: 16px; color: #666;"">Thank you for your purchase!</p>
-            //      </div>
-            //        </div>";
+            foreach (var item in order.OrderItems)
+            {
+                orderItemsHtml += $@"
+                            <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
+                                <p><strong>สถานที่:</strong> {item.Location.Name}</p>
+                                <p><strong>เวลาเริ่มต้น:</strong> {item.StartTime}</p>
+                                <p><strong>เวลาสิ้นสุด:</strong> {item.EndTime}</p>
+                                <p><strong>ราคา:</strong> {item.Price.ToString("#,##0")}</p>
+                            </div>";
+            }
 
 
-            //        var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
-            //        await _sendGridClient.SendEmailAsync(emailMessage);
+            var from = new EmailAddress("64123250113@kru.ac.th", "ผู้พัฒนา");
+            var to = new EmailAddress(checkuser.Email);
+            var subject = "การยืนยันการสั่งจอง";
+            var htmlContent = $@"
+            <div style=""width: 100%; max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; border: 1px solid #ccc; padding: 20px;"">
+                <div style=""text-align: center;"">
+                    <img src=""https://www.kru.ac.th/kru/assets/img/kru/logo/kru_color.png"" alt=""Company Logo"" style=""max-width: 100px; margin-bottom: 20px;"">
+                    <h2 style=""font-size: 24px; color: #333; margin-bottom: 10px;"">ใบเสร็จการจองสถานที่</h2>
+                </div>
+
+                <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+
+                <div style=""margin-bottom: 20px;"">
+                    <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">รายละเอียดการจองสถานที่</h3>
+                    <p><strong>วันที่สั่งจอง : </strong> {order.OrderDate}</p>
+                </div>
+
+                <div style=""margin-bottom: 20px;"">
+                    <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">ข้อมูลส่วนตัว</h3>
+                    <p><strong> ชื่อ :</strong>{checkuser.FirstName} <strong>นามสกุล :</strong> {checkuser.LastName} <strong>เบอร์โทร :</strong> {checkuser.PhoneNumber}</p>
+                </div>
+
+                <div style=""margin-bottom: 20px;"">
+                    <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">รายการจอง</h3>
+                    {orderItemsHtml}
+                </div>
+
+                <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
+
+                <div style=""text-align: right;"">
+                    <strong style=""font-size: 18px; color: #333;""><strong>ราคารวม:</strong> {order.GetTotalAmount().ToString("#,##0")}</strong>
+                </div>
+
+                <div style=""text-align: center; margin-top: 20px;"">
+                     <p style=""font-size: 16px; color: #666;"">ขอบคุณที่มาใช้บริการของเรา!</p>
+                  </div>
+                    </div>";
+
+
+            var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
+            await _sendGridClient.SendEmailAsync(emailMessage);
 
             return Ok(order);
         }
@@ -747,6 +764,63 @@ namespace BackendAPI.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet("GetOrderAllStatusSuccessfulPayment")]
+        public async Task<ActionResult> GetOrderAllStatusSuccessfulPayment()
+        {
+            var orders = await _dataContext.ReservationsOrders
+                .Include(x => x.OrderItems).ThenInclude(x => x.Location).ThenInclude(x => x.Category)
+                .Where(x => x.OrderStatus == Models.OrderStatus.SuccessfulPaymentforcreditCard &&
+                            x.OrderItems.Any(item => item.StatusFinished == 1 || item.StatusFinished == 2 || item.StatusFinished == 0))
+                .ToListAsync();
+
+            var result = new List<object>();
+
+            foreach (var order in orders)
+            {
+                var user = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id == order.UserId);
+
+                if (user != null)
+                {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    var roleConcurrencyStamps = roles.Select(role => _roleManager.Roles.Single(r => r.Name == role).ConcurrencyStamp);
+
+                    var agencyName = await GetAgencyName(user.AgencyId);
+
+                    var orderResult = new
+                    {
+                        user = new
+                        {
+                            user.Email,
+                            user.UserName,
+                            user.PhoneNumber,
+                            user.FirstName,
+                            user.LastName,
+                            AgencyName = agencyName,
+                            user.StatusOnOff,
+                            user.AccessFailedCount,
+                            user.EmailConfirmed,
+                            RoleConcurrencyStamps = roleConcurrencyStamps
+                        },
+                        order.Id,
+                        order.OrderImage,
+                        order.OrderDate,
+                        order.OrderStatus,
+                        orderItems = order.OrderItems.Select(orderItem => new
+                        {
+                            orderItem.Location,
+                            orderItem.Price,
+                            orderItem.Objectives,
+                            orderItem.StartTime,
+                            orderItem.EndTime,
+                        }).ToList()
+                    };
+                    result.Add(orderResult);
+                }
+            }
+            return Ok(result);
+        }
+
         [HttpGet("UpdateOrderStatus")]
         public async Task<ActionResult> UpdateOrderStatus(int orderId)
         {
@@ -759,15 +833,39 @@ namespace BackendAPI.Controllers
                 return NotFound($"Order with id {orderId} not found");
             }
 
-            order.OrderStatus = Models.OrderStatus.SuccessfulPaymentforcreditCard; 
+            order.OrderStatus = Models.OrderStatus.SuccessfulPaymentforcreditCard;
+            foreach (var orderItem in order.OrderItems)
+            {
+                orderItem.StatusFinished = 1; 
+            }
             await _dataContext.SaveChangesAsync();
 
             return Ok("OrderStatus Update");
         }
 
+        [HttpGet("UpdateOrderStatusCalcel")]
+        public async Task<ActionResult> UpdateOrderStatusCalcel(int orderId)
+        {
+            var order = await _dataContext.ReservationsOrders
+                .Include(x => x.OrderItems)
+                .FirstOrDefaultAsync(x => x.Id == orderId);
 
+            if (order == null)
+            {
+                return NotFound($"Order with id {orderId} not found");
+            }
 
+            order.OrderStatus = Models.OrderStatus.Cancel;
 
+            foreach (var item in order.OrderItems)
+            {
+                item.StatusFinished = 5;
+            }
+
+            await _dataContext.SaveChangesAsync();
+
+            return Ok("OrderStatus Update");
+        }
         //[HttpGet("GetOrderByUserId")]
         //public async Task<ActionResult> GetOrderByUserId(string UserId)
         //{

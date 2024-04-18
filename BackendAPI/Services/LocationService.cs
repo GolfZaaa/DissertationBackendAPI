@@ -26,7 +26,6 @@ public class LocationService : ILocationService
     }
     public async Task<Result<string>> CreateLocationAsync(LocationRequest dto)
     {
-
         var test = await _dataContext.Locations.FirstOrDefaultAsync(x => x.Name == dto.Name);
         if (test != null)
         {
@@ -38,11 +37,11 @@ public class LocationService : ILocationService
         {
             return Result<string>.Failure("Category Not Found.");
         }
-
-
         //อัพโหลดไฟล์ Start
+        //(string errorMessage, List<string> imageNames) = await UploadImageAsync(dto.FormFiles);
+        //if (!string.IsNullOrEmpty(errorMessage)) return Result<string>.Failure("Fail to UploadImages");
         (string errorMessage, List<string> imageNames) = await UploadImageAsync(dto.FormFiles);
-        if (!string.IsNullOrEmpty(errorMessage)) return Result<string>.Failure("Fail to UploadImages");
+        if (!string.IsNullOrEmpty(errorMessage)) return Result<string>.Failure(errorMessage);
 
 
         var map = _mapper.Map<Location>(dto); 
@@ -88,6 +87,13 @@ public class LocationService : ILocationService
         {
             return Result<string>.Failure("Not Found Location");
         }
+        var locationReservationCount = await _dataContext.ReservationsOrderItems.CountAsync(x => x.LocationId == location.Id);
+        if (locationReservationCount > 0)
+        {
+            return Result<string>.Failure("Cannot Delete because have Reservation");
+
+        }
+
         _dataContext.Locations.Remove(location);
 
         if(!string.IsNullOrEmpty(location.Image))

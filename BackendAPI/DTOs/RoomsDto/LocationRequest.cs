@@ -12,17 +12,3 @@ namespace BackendAPI.DTOs.RoomsDto;
     public int CategoryId { get; set; }
     public IFormFileCollection? FormFiles { get; set; }
 }
-
-
-public class LocationRequestValidator : AbstractValidator<LocationRequest>
-{
-    public LocationRequestValidator()
-    {
-        RuleFor(x => x.Name).NotEmpty().WithMessage("LocationName is empty");
-        RuleFor(x => x.Capacity).NotEmpty().WithMessage("Capacity is empty");
-        RuleFor(x => x.Image).NotEmpty().WithMessage("Image is empty");
-        RuleFor(x => x.PlaceDescription).NotEmpty().WithMessage("PlaceDescription is empty");
-        RuleFor(x => x.CategoryId).NotEmpty().WithMessage("CategoryId is empty");
-    }
-
-}

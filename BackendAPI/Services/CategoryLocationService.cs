@@ -73,6 +73,14 @@ namespace BackendAPI.Services
                 return Result<string>.Failure("Not Found Category");
             }
 
+            var locationsWithCategory = await _dataContext.Locations
+            .AnyAsync(l => l.Category.Id == id);
+
+            if (locationsWithCategory)
+            {
+                return Result<string>.Failure("Category is associated with one or more locations and cannot be deleted.");
+            }
+
             _dataContext.CategoryLocations.Remove(category);
             await _dataContext.SaveChangesAsync();
             return Result<string>.Success($"Delete Category ID{id} Success");

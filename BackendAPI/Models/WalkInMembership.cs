@@ -6,11 +6,11 @@ namespace BackendAPI.Models
     {
         public int Id { get; set; }
         public string UserId { get; set; }
-        public DateTime ExpirationTime { get; set; }
-        public int LocationId { get; set; }
+        public DateTime StartTime { get; set; } 
+        public DateTime EndTime { get; set; }
+        public int MembershipPriceId { get; set; }
         [JsonIgnore]
-        public Location Location { get; set; }
+        public MembershipPrice MembershipPrice { get; set; }
         public string CreateBy { get; set; }
-
     }
 }

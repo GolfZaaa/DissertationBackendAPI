@@ -321,7 +321,10 @@ namespace BackendAPI.Migrations
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Price")
+                    b.Property<int>("PriceForMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PriceWalkin")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -417,11 +420,14 @@ namespace BackendAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpirationTime")
+                    b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LocationId")
+                    b.Property<int>("MembershipPriceId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -429,7 +435,7 @@ namespace BackendAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("MembershipPriceId");
 
                     b.ToTable("WalkInMemberships");
                 });
@@ -493,35 +499,35 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2768673d-9e20-4451-9349-003af7259740",
+                            Id = "4f8ccc08-676f-4633-8966-0c1ef6f5c3fb",
                             ConcurrencyStamp = "นักศึกษา",
                             Name = "Student",
                             NormalizedName = "Student"
                         },
                         new
                         {
-                            Id = "86620432-18da-4579-9a85-310ae00377e8",
+                            Id = "3636a408-8e6b-4689-9096-a92b1a27bd03",
                             ConcurrencyStamp = "อาจารย์",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "22e04da6-9c0d-4474-bf4d-6e948bef2cab",
+                            Id = "785c4bb4-c41e-4133-8163-d37975248bc5",
                             ConcurrencyStamp = "บุคคลภายนอก",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "84fbdaa5-01b7-430a-b478-3f1327147787",
+                            Id = "cbbb4674-fe5a-462e-b757-36f8fc7e90ae",
                             ConcurrencyStamp = "ผู้อนุมัติ",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "bba4d0da-7072-4c7c-80cd-8a761e0ae99f",
+                            Id = "4926735b-f57a-4f50-89b7-25000b5576c1",
                             ConcurrencyStamp = "ผู้ดูแลระบบ",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
@@ -710,13 +716,13 @@ namespace BackendAPI.Migrations
 
             modelBuilder.Entity("BackendAPI.Models.WalkInMembership", b =>
                 {
-                    b.HasOne("BackendAPI.Models.Location", "Location")
+                    b.HasOne("BackendAPI.Models.MembershipPrice", "MembershipPrice")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("MembershipPriceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.Navigation("MembershipPrice");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

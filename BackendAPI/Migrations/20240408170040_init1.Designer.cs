@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240218131152_init2")]
-    partial class init2
+    [Migration("20240408170040_init1")]
+    partial class init1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -310,6 +310,33 @@ namespace BackendAPI.Migrations
                     b.ToTable("LoginAttempts");
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.MembershipPrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PriceForMonth")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PriceWalkin")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.ToTable("MembershipPrices");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.ReservationsOrder", b =>
                 {
                     b.Property<int>("Id")
@@ -396,11 +423,14 @@ namespace BackendAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpirationTime")
+                    b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LocationId")
+                    b.Property<int>("MembershipPriceId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -408,7 +438,7 @@ namespace BackendAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("MembershipPriceId");
 
                     b.ToTable("WalkInMemberships");
                 });
@@ -472,35 +502,35 @@ namespace BackendAPI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "146abf8c-2f88-42da-8454-f036078e0be7",
+                            Id = "4f8ccc08-676f-4633-8966-0c1ef6f5c3fb",
                             ConcurrencyStamp = "นักศึกษา",
                             Name = "Student",
                             NormalizedName = "Student"
                         },
                         new
                         {
-                            Id = "382ed985-cfdf-48b7-81e0-5c1c0eca80d1",
+                            Id = "3636a408-8e6b-4689-9096-a92b1a27bd03",
                             ConcurrencyStamp = "อาจารย์",
                             Name = "Professor",
                             NormalizedName = "Professor"
                         },
                         new
                         {
-                            Id = "0612d3e2-03eb-40ce-b75d-ba32d6244606",
+                            Id = "785c4bb4-c41e-4133-8163-d37975248bc5",
                             ConcurrencyStamp = "บุคคลภายนอก",
                             Name = "Outsider",
                             NormalizedName = "Outsider"
                         },
                         new
                         {
-                            Id = "d13bde67-4367-4409-8859-9431fbee8d76",
+                            Id = "cbbb4674-fe5a-462e-b757-36f8fc7e90ae",
                             ConcurrencyStamp = "ผู้อนุมัติ",
                             Name = "Approver",
                             NormalizedName = "Approver"
                         },
                         new
                         {
-                            Id = "00bb4d14-96e1-4ad0-b1b0-4b0f1382fa39",
+                            Id = "4926735b-f57a-4f50-89b7-25000b5576c1",
                             ConcurrencyStamp = "ผู้ดูแลระบบ",
                             Name = "Administrator",
                             NormalizedName = "Administrator"
@@ -657,6 +687,17 @@ namespace BackendAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.MembershipPrice", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.ReservationsOrderItem", b =>
                 {
                     b.HasOne("BackendAPI.Models.Location", "Location")
@@ -678,13 +719,13 @@ namespace BackendAPI.Migrations
 
             modelBuilder.Entity("BackendAPI.Models.WalkInMembership", b =>
                 {
-                    b.HasOne("BackendAPI.Models.Location", "Location")
+                    b.HasOne("BackendAPI.Models.MembershipPrice", "MembershipPrice")
                         .WithMany()
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("MembershipPriceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.Navigation("MembershipPrice");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

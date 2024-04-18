@@ -119,7 +119,7 @@ namespace BackendAPI.Controllers
 
 
             var checkReservation = await _dataContext.ReservationsOrderItems
-                  .Where(x => x.LocationId == dto.LocationId && (x.StatusFinished == 0 ||x.StatusFinished == 1 || x.StatusFinished == 2 || x.StatusFinished == 3) &&
+                  .Where(x => x.LocationId == dto.LocationId && (x.StatusFinished == 0 ||x.StatusFinished == 1 || x.StatusFinished == 2) &&
                 ((dto.StartTime >= x.StartTime && dto.StartTime < x.EndTime) ||
                  (dto.EndTime > x.StartTime && dto.EndTime <= x.EndTime) ||
                  (x.StartTime >= dto.StartTime && x.StartTime < dto.EndTime) ||

@@ -133,7 +133,8 @@ namespace BackendAPI.Migrations
                     TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NumberOfPeople = table.Column<int>(type: "int", nullable: false),
                     LocationId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -341,6 +342,28 @@ namespace BackendAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MembershipPrices",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PriceForMonth = table.Column<int>(type: "int", nullable: false),
+                    PriceWalkin = table.Column<int>(type: "int", nullable: false),
+                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LocationId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MembershipPrices", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MembershipPrices_Locations_LocationId",
+                        column: x => x.LocationId,
+                        principalTable: "Locations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ReservationsOrderItems",
                 columns: table => new
                 {
@@ -379,16 +402,18 @@ namespace BackendAPI.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ExpirationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LocationId = table.Column<int>(type: "int", nullable: false)
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MembershipPriceId = table.Column<int>(type: "int", nullable: false),
+                    CreateBy = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WalkInMemberships", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_WalkInMemberships_Locations_LocationId",
-                        column: x => x.LocationId,
-                        principalTable: "Locations",
+                        name: "FK_WalkInMemberships_MembershipPrices_MembershipPriceId",
+                        column: x => x.MembershipPriceId,
+                        principalTable: "MembershipPrices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -398,11 +423,11 @@ namespace BackendAPI.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "0a891df9-5564-4085-b59c-6990d1697c25", "นักศึกษา", "Student", "Student" },
-                    { "1c17075b-d463-40b9-a79e-fda949f13c20", "ผู้ดูแลระบบ", "Administrator", "Administrator" },
-                    { "237a4478-29a6-4ea1-8711-44924d26072a", "บุคคลภายนอก", "Outsider", "Outsider" },
-                    { "5599ceb3-1800-44b2-b413-c3e9960529fe", "ผู้อนุมัติ", "Approver", "Approver" },
-                    { "db10f34e-a751-4054-aceb-904cbcb143b6", "อาจารย์", "Professor", "Professor" }
+                    { "3636a408-8e6b-4689-9096-a92b1a27bd03", "อาจารย์", "Professor", "Professor" },
+                    { "4926735b-f57a-4f50-89b7-25000b5576c1", "ผู้ดูแลระบบ", "Administrator", "Administrator" },
+                    { "4f8ccc08-676f-4633-8966-0c1ef6f5c3fb", "นักศึกษา", "Student", "Student" },
+                    { "785c4bb4-c41e-4133-8163-d37975248bc5", "บุคคลภายนอก", "Outsider", "Outsider" },
+                    { "cbbb4674-fe5a-462e-b757-36f8fc7e90ae", "ผู้อนุมัติ", "Approver", "Approver" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -470,6 +495,11 @@ namespace BackendAPI.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MembershipPrices_LocationId",
+                table: "MembershipPrices",
+                column: "LocationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ReservationsOrderItems_LocationId",
                 table: "ReservationsOrderItems",
                 column: "LocationId");
@@ -480,9 +510,9 @@ namespace BackendAPI.Migrations
                 column: "ReservationsOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_WalkInMemberships_LocationId",
+                name: "IX_WalkInMemberships_MembershipPriceId",
                 table: "WalkInMemberships",
-                column: "LocationId");
+                column: "MembershipPriceId");
         }
 
         /// <inheritdoc />
@@ -534,10 +564,13 @@ namespace BackendAPI.Migrations
                 name: "ReservationsOrders");
 
             migrationBuilder.DropTable(
-                name: "Locations");
+                name: "MembershipPrices");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Locations");
 
             migrationBuilder.DropTable(
                 name: "CategoryLocations");

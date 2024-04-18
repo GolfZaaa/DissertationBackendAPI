@@ -205,21 +205,21 @@ namespace BackendAPI.Services
             if (!string.IsNullOrEmpty(cachedToken))
             {
                 // ส่งอีเมล์ยืนยันอีเมล์ไปยังผู้ใช้
-                var from = new EmailAddress("64123250113@kru.ac.th", "Golf");
+                var from = new EmailAddress("64123250113@kru.ac.th", "ผู้พัฒนา");
                 var to = new EmailAddress(email);
-                var subject = "Thank you";
+                var subject = "ขอบคุณ";
 
                 var expirationTime = DateTime.Now.AddHours(24);
 
                 var htmlContent = "<div style=\"text-align: center; background-color: #f0f0f0; padding: 20px; border-radius: 10px; box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);\">";
                 htmlContent += "<img src=\"https://ip.kru.ac.th/assets/img/kru.png\" alt=\"Your Logo\" style=\"max-width: 130px;\" />";
-                htmlContent += "<p><strong><h1 style=\"font-size:2.7em; color: #0073e6; font-family: 'Arial', sans-serif; margin-bottom: 20px;\">Confirm Your Email</h1></strong></p>";
-                htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">Thank you for registering with us!</p>";
-                htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">To complete your registration, please confirm your email address by using the following token:</p>";
+                htmlContent += "<p><strong><h1 style=\"font-size:2.7em; color: #0073e6; font-family: 'Arial', sans-serif; margin-bottom: 20px;\">ยืนยันอีเมลของคุณ</h1></strong></p>";
+                htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">ขอบคุณที่ลงทะเบียนกับเราครับ!</p>";
+                htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">เพื่อทำการลงทะเบียนเสร็จสิ้น กรุณายืนยันที่อยู่อีเมลของคุณโดยการใช้โทเค็นต่อไปนี้: </p>";
                 htmlContent += $"<p><strong><h1 style=\"font-size:7em; color: #ff5733; font-family: 'Times New Roman', serif; letter-spacing: 10px; font-weight: bold;\">{cachedToken}</h1></strong></p>";
-                htmlContent += "<p style=\"font-size: 1.2em; color: #888;\">This token will expire on " + expirationTime.ToString("MMM dd, yyyy HH:mm tt") + " (UTC).</p>";
+                htmlContent += "<p style=\"font-size: 1.2em; color: #888;\">โทเค็นนี้จะหมดอายุเมื่อ " + expirationTime.ToString(" dd MMM yyyy HH:mm tt") + " (UTC).</p>";
                 htmlContent += "</div>";
-                htmlContent += "<p style=\"text-align: center; font-size: 1em; color: #888; margin-top: 30px;\">If you didn't register, please ignore this email.</p>";
+                htmlContent += "<p style=\"text-align: center; font-size: 1em; color: #888; margin-top: 30px;\">หากคุณยังไม่ได้ลงทะเบียน กรุณาไม่ตอบกลับอีเมลนี้.</p>";
 
                 var emailMessage = MailHelper.CreateSingleEmail(from, to, subject, htmlContent, htmlContent);
                 await _sendGridClient.SendEmailAsync(emailMessage);

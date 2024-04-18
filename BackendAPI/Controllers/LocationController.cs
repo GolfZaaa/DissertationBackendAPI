@@ -25,13 +25,6 @@ public class LocationController : BaseApiController
     [HttpPost("CreateLocationService")]
     public async Task<IActionResult> CreateLocation([FromForm] LocationRequest dto)
     {
-        var validator = new LocationRequestValidator();
-        var result = validator.Validate(dto);
-        if (!result.IsValid)
-        {
-            var errors = result.Errors.Select(error => error.ErrorMessage).ToList();
-            return BadRequest(new { Message = "Validation Create Error", Errors = errors });
-        }
         return HandleResult(await _locationService.CreateLocationAsync(dto));
     }
 
@@ -70,10 +63,15 @@ public class LocationController : BaseApiController
             HandleResult(Result<string>.Failure("Not Found Location"));
         }
 
-        var locationReservationCount = await _dataContext.ReservationsOrderItems.CountAsync(x => x.LocationId == location.Id);
-        if (locationReservationCount > 0)
+        //var locationReservationCount = await _dataContext.ReservationsOrderItems.CountAsync(x => x.LocationId == location.Id);
+        //if (locationReservationCount > 0)
+        //{
+        //    return BadRequest("Cannot change status. Location is in use by users.");
+        //}
+
+        if(location.Status == 0)
         {
-            return BadRequest("Cannot change status. Location is in use by users.");
+            return BadRequest("Cannot change status. Location is in useing by users.");
         }
 
         if (dto.StatusOnOff == 0)

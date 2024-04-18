@@ -70,7 +70,7 @@ namespace BackendAPI.Data
         public DbSet<Agency> Agencys { get; set; }
         public DbSet<WalkInTransaction> WalkInTransactions { get; set; }
         public DbSet<WalkInMembership> WalkInMemberships { get; set; }
-        //public DbSet<MembershipPrice> MembershipPrices { get; set; }
+        public DbSet<MembershipPrice> MembershipPrices { get; set; }
 
 
     }
