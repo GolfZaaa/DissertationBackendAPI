@@ -128,17 +128,13 @@ public class LocationService : ILocationService
 
     public async Task<Result<string>> UpdateLocationAsync([FromForm] UpdateLocationDto dto)
     {
-        var findLocation = await _dataContext.Locations.FindAsync(dto.Id);
+        var findLocation = await _dataContext.Locations
+    .Include(l => l.Category) 
+    .SingleOrDefaultAsync(l => l.Id == dto.Id);
+
         if (findLocation == null)
         {
             return Result<string>.Failure("Location not found");
-        }
-
-
-        var existingCategory = await _dataContext.CategoryLocations.FindAsync(dto.CategoryId);
-        if (existingCategory == null)
-        {
-            return Result<string>.Failure("Category Not Found.");
         }
 
         if (dto.Name != null && dto.Name != findLocation.Name)
@@ -155,15 +151,8 @@ public class LocationService : ILocationService
         {
             return Result<string>.Failure("Fail to UploadImages");
         }
-
-
-
-        //map.Image = findLocation.Image;
-
-        //var OldImage = _dataContext.Locations.Where(a => a.Id == dto.Id).Select(x => x.Image).FirstOrDefaultAsync();
         string imageFileName = "";
         string uploadDirectory = "wwwroot/LocationImage";
-
         if (dto.Image != null)
         {
             string filePathToDelete = Path.Combine(uploadDirectory, findLocation.Image);
@@ -171,40 +160,46 @@ public class LocationService : ILocationService
             {
                 System.IO.File.Delete(filePathToDelete);
             }
-
             imageFileName = "Lo_" + Guid.NewGuid() + Path.GetExtension(dto.Image.FileName);
             var imagePath = Path.Combine(uploadDirectory, imageFileName);
-
-
             using (var stream = new FileStream(imagePath, FileMode.Create))
             {
                 await dto.Image.CopyToAsync(stream);
             }
-
             findLocation.Image = imageFileName;
         }
         else
         {
-            var response = new UpdateLocationDto
+            var newCategory = await _dataContext.CategoryLocations.FindAsync(dto.CategoryId);
+            if (newCategory != null)
             {
+                findLocation.Category = newCategory;
+            }
+            else
+            {
+                findLocation.Category = findLocation.Category;
+            }
 
-                Id = dto.Id,
-                Name = dto.Name,
-                Capacity = dto.Capacity,
-                PlaceDescription = dto.PlaceDescription,
-                CategoryId = dto.CategoryId,
-            };
+            if(dto.PlaceDescription != null)
+            {
+                findLocation.PlaceDescription = dto.PlaceDescription;
+            }
+            else
+            {
+                findLocation.PlaceDescription = findLocation.PlaceDescription;
+            }
+            if (dto.Capacity.HasValue)
+            {
+                findLocation.Capacity = dto.Capacity.Value;
+            }
             findLocation.Image = findLocation.Image;
         }
-
         if (imageNames.Count > 0)
         {
             var newImages = imageNames.Select(image => new LocationImages { Image = image }).ToList();
-
             findLocation.locationImages.AddRange(newImages);
         }
         await _dataContext.SaveChangesAsync();
-
         return Result<string>.Success("Update Location Success");
     }
 

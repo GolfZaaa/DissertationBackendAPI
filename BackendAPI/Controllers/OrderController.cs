@@ -211,8 +211,13 @@ namespace BackendAPI.Controllers
         [HttpGet("GetOrderReservationsByCategoryId")]
         public async Task<ActionResult> GetOrderReservationsByCategoryId(int id)
         {
+            //var reservationsOrderitem = await _dataContext.ReservationsOrderItems.Include(x => x.Location).ThenInclude(x => x.Category)
+            //    .Where(x => x.Location.Category.Id == id).OrderBy(x=>x.StartTime).ToListAsync();
+
             var reservationsOrderitem = await _dataContext.ReservationsOrderItems.Include(x => x.Location).ThenInclude(x => x.Category)
-                .Where(x => x.Location.Category.Id == id).OrderBy(x=>x.StartTime).ToListAsync();
+         .Where(x => x.Location.Category.Id == id && (x.StatusFinished == 0 || x.StatusFinished == 1 || x.StatusFinished == 2))
+         .OrderBy(x => x.StartTime)
+         .ToListAsync();
 
             if (reservationsOrderitem == null || !reservationsOrderitem.Any())
             {

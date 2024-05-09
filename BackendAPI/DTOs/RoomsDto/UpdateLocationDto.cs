@@ -8,7 +8,7 @@ namespace BackendAPI.DTOs.RoomsDto;
     public int? Capacity { get; set; }
     public IFormFile? Image { get; set; }
     public string? PlaceDescription { get; set; }
-    public int CategoryId { get; set; }
+    public int? CategoryId { get; set; }
     public IFormFileCollection? FormFiles { get; set; }
 }
 
