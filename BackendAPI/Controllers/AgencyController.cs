@@ -65,7 +65,8 @@ namespace BackendAPI.Controllers
             return HandleResult(Result<string>.Success("Update Agency Success"));
         }
 
-        [HttpDelete("DeleteAgency")]
+        //[HttpDelete("DeleteAgency")]
+        [HttpPost("DeleteAgency")]
         public async Task<ActionResult> DeleteAgency(int id)
         {
             var agency = await _dataContext.Agencys.FindAsync(id);

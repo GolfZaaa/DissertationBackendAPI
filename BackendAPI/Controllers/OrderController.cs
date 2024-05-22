@@ -11,6 +11,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 using Stripe;
 using Stripe.Climate;
+using System.Globalization;
 
 namespace BackendAPI.Controllers
 {
@@ -346,13 +347,18 @@ namespace BackendAPI.Controllers
 
 
 
-                TimeSpan totalHours = item.EndTime - item.StartTime;
-                double totalHoursValue = totalHours.TotalHours;
-                int totalRoundedHours = (int)Math.Round(totalHoursValue);
 
-                var price = totalRoundedHours * (long)locationtest.Category.Servicefees;
+                    // เป็นการคำนวนแบบชั่วโมง
+                    //TimeSpan totalHours = item.EndTime - item.StartTime;
+                    //double totalHoursValue = totalHours.TotalHours;
+                    //int totalRoundedHours = (int)Math.Round(totalHoursValue);
+                    //var price = totalRoundedHours * (long)locationtest.Category.Servicefees;
+                    TimeSpan totalDays = item.EndTime.Date - item.StartTime.Date;
+                    double totalDaysValue = totalDays.TotalDays;
+                    int totalRoundedDays = (int)Math.Ceiling(totalDaysValue);
+                    var price = totalRoundedDays * (long)locationtest.Category.Servicefees;
 
-                if(dto.OrderImage != null)
+                    if (dto.OrderImage != null)
                     {
                         var orderItem = new ReservationsOrderItem
                         {
@@ -429,15 +435,19 @@ namespace BackendAPI.Controllers
 
             foreach (var item in order.OrderItems)
             {
+                var startDateThai = item.StartTime.ToString("d", new CultureInfo("th-TH"));
+                var endDateThai = item.EndTime.ToString("d", new CultureInfo("th-TH"));
+
                 orderItemsHtml += $@"
                             <div style=""border: 1px solid #ccc; padding: 10px; margin: 10px;"">
                                 <p><strong>สถานที่:</strong> {item.Location.Name}</p>
-                                <p><strong>เวลาเริ่มต้น:</strong> {item.StartTime}</p>
-                                <p><strong>เวลาสิ้นสุด:</strong> {item.EndTime}</p>
-                                <p><strong>ราคา:</strong> {item.Price.ToString("#,##0")}</p>
+                                   <p><strong>วันที่เริ่มต้น:</strong> {startDateThai}</p>
+                                   <p><strong>วันที่สิ้นสุด:</strong> {endDateThai}</p>
+                                <p><strong>ราคา:</strong> {item.Price.ToString("#,##0")} บาท</p>
                             </div>";
             }
 
+            var orderDateThai = order.OrderDate.ToString("f", new CultureInfo("th-TH"));
 
             var from = new EmailAddress("64123250113@kru.ac.th", "ผู้พัฒนา");
             var to = new EmailAddress(checkuser.Email);
@@ -453,7 +463,7 @@ namespace BackendAPI.Controllers
 
                 <div style=""margin-bottom: 20px;"">
                     <h3 style=""font-size: 20px; color: #333; margin-bottom: 10px;"">รายละเอียดการจองสถานที่</h3>
-                    <p><strong>วันที่สั่งจอง : </strong> {order.OrderDate}</p>
+                   <p><strong>วันที่สั่งจอง : </strong> {orderDateThai}</p>
                 </div>
 
                 <div style=""margin-bottom: 20px;"">
@@ -469,7 +479,7 @@ namespace BackendAPI.Controllers
                 <hr style=""border: 1px solid #ccc; margin: 20px 0;"">
 
                 <div style=""text-align: right;"">
-                    <strong style=""font-size: 18px; color: #333;""><strong>ราคารวม:</strong> {order.GetTotalAmount().ToString("#,##0")}</strong>
+                    <strong style=""font-size: 18px; color: #333;""><strong>ราคารวม:</strong> {order.GetTotalAmount().ToString("#,##0")} บาท </strong>
                 </div>
 
                 <div style=""text-align: center; margin-top: 20px;"">
@@ -537,58 +547,6 @@ namespace BackendAPI.Controllers
             }
         }
 
-        //[HttpGet("GetReservationOrderByReservationOrderId")]
-        //public async Task<ActionResult> GetReservationOrderByReservationOrderId(int ReservationOrderId)
-        //{
-        //    var search = await _dataContext.ReservationsOrders.FirstOrDefaultAsync(x=>x.Id == ReservationOrderId);
-        //    if(search == null)
-        //    {
-        //        return HandleResult(Result<string>.Failure("Not Found ReservationOrder"));
-        //    }
-        //    return Ok(search);
-        //}
-
-
-        //[HttpGet]
-        //public async Task<ActionResult>TestOrderById(int OrderId)
-        //{
-        //    var order = await _dataContext.ReservationsOrders.Include(x=>x.OrderItems).FirstOrDefaultAsync(x=>x.Id.Equals(OrderId));
-
-        //    return Ok(new
-        //    {
-        //        order = new
-        //        {
-        //            order.Id,
-        //        },
-        //        orderItem = order.OrderItems.toList(),
-        //        user = await _dataContext.Users.FirstOrDefaultAsync(x=>x.Id.Equals(order.UserId)),
-        //    }); ;
-        //}
-
-        //[HttpGet]
-        //public async Task<ActionResult> TestOrderById(int OrderId)
-        //{
-        //    var order = await _dataContext.ReservationsOrders.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id.Equals(OrderId));
-        //    var user = await _dataContext.Users.FirstOrDefaultAsync(x => x.Id.Equals(order.UserId));
-
-        //    return Ok(new
-        //    {
-        //        order = new
-        //        {
-        //            order.Id,
-        //        },
-        //        orderItem = order.OrderItems.Select(x => new
-        //        {
-        //            x.StartTime,
-        //            x.EndTime
-        //        }),
-        //        user = new
-        //        {
-        //            user.FirstName,
-        //            user.LastName
-        //        },
-        //    }); ;
-        //}
 
         [HttpGet("GetReservationOrderByReservationOrderId")]
         public async Task<ActionResult>GetReservationOrderByReservationOrderId(int ReservationOrderId)
@@ -871,22 +829,5 @@ namespace BackendAPI.Controllers
 
             return Ok("OrderStatus Update");
         }
-        //[HttpGet("GetOrderByUserId")]
-        //public async Task<ActionResult> GetOrderByUserId(string UserId)
-        //{
-        //    var user = await _dataContext.Users.SingleOrDefaultAsync(u => u.Id == UserId);
-
-        //    if (user == null)
-        //        return HandleResult(Result<string>.Failure("User Not Found"));
-
-        //    var result = await _dataContext.ReservationsOrders.ToListAsync();
-
-        //    if (result == null || result.Count == 0)
-        //    {
-        //        return HandleResult(Result<string>.Failure("Notfound Order"));
-        //    }
-
-        //    return HandleResult(Result<object>.Success(result));
-        //}
     }
 }

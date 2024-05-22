@@ -33,7 +33,15 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
-builder.Services.AddDbContext<DataContext>();
+//builder.Services.AddDbContext<DataContext>();
+
+// เพิ่มขึ้นมา
+builder.Services.AddDbContext<DataContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+});
+
+
 builder.Services.AddMemoryCache();
 
 #region Start JWT
@@ -121,8 +129,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//ต้องใส่ ถ้าไม่ใส่จะหาไฟล์รูปภาพไม่เจอ
 app.UseStaticFiles();
 app.UseCors("corsapp");
+
+// เพิ่มขึ้นมา
+app.MapFallbackToController("Index", "Fallback");
+
 
 app.UseAuthentication();
 app.UseAuthorization();

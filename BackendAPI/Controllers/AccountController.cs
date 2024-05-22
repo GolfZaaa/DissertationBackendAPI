@@ -82,7 +82,8 @@ public class AccountController : BaseApiController
         return HandleResult(await _accountServices.RegisterAsync(registerDto));
     }
 
-    [HttpDelete("DeleteUserService")]
+    //[HttpDelete("DeleteUserService")]
+    [HttpPost("DeleteUserService")]
     public async Task<ActionResult> DeleteUser(string userId)
     {
         return HandleResult(await _accountServices.DeleteAsync(userId));

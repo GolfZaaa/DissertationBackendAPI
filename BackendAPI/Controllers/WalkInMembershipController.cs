@@ -295,7 +295,8 @@ namespace BackendAPI.Controllers
             return HandleResult(Result<string>.Success("Update Price For Member Success"));
         }
 
-        [HttpDelete("DeleteMembershipPrice")]
+        //[HttpDelete("DeleteMembershipPrice")]
+        [HttpPost("DeleteMembershipPrice")]
         public async Task<ActionResult> DeleteMembershipPrice(int id)
         {
             var MemberShipPrice = await _dataContext.MembershipPrices.FindAsync(id);
@@ -391,6 +392,27 @@ namespace BackendAPI.Controllers
                 .ToListAsync();
 
             return Ok(membershipPrices);
+        }
+
+
+        [HttpGet("GetWalkInMembershipsByUserId")]
+        public async Task<ActionResult<IEnumerable<object>>> GetWalkInMembershipsByUserId(string userId)
+        {
+            var walkInMemberships = await _dataContext.WalkInMemberships
+                .Where(membership => membership.UserId == userId)
+                .Include(membership => membership.MembershipPrice)
+                .Join(
+                    _dataContext.Locations,
+                    membership => membership.MembershipPrice.LocationId,
+                    location => location.Id,
+                    (membership, location) => new
+                    {
+                        Membership = membership,
+                        LocationName = location.Name
+                    })
+                .ToListAsync();
+
+            return Ok(walkInMemberships);
         }
 
 

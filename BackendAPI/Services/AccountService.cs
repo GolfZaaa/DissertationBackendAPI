@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -63,6 +64,11 @@ namespace BackendAPI.Services
         public async Task<Result<object>> LoginAsync(LoginDto dto)
         {
             var user = await _userManager.FindByNameAsync(dto.Username);
+
+            if(user == null)
+            {
+                return Result<object>.Failure("UserName or Password Wrong.");
+            }
 
             //เช็ค UserLogin ผิดเกิน 3 ครั้ง
             if (!await _userManager.CheckPasswordAsync(user, dto.Password))
@@ -152,7 +158,6 @@ namespace BackendAPI.Services
                 ProfileImage = user.ProfileImage,
             };
             return Result<object>.Success(userDto);
-
         }
 
         public async Task<Result<object>> RegisterAsync(RegisterDto registerDto)
@@ -210,6 +215,7 @@ namespace BackendAPI.Services
                 var subject = "ขอบคุณ";
 
                 var expirationTime = DateTime.Now.AddHours(24);
+                var thaiCulture = new CultureInfo("th-TH");
 
                 var htmlContent = "<div style=\"text-align: center; background-color: #f0f0f0; padding: 20px; border-radius: 10px; box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);\">";
                 htmlContent += "<img src=\"https://ip.kru.ac.th/assets/img/kru.png\" alt=\"Your Logo\" style=\"max-width: 130px;\" />";
@@ -217,7 +223,7 @@ namespace BackendAPI.Services
                 htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">ขอบคุณที่ลงทะเบียนกับเราครับ!</p>";
                 htmlContent += "<p style=\"font-size: 1.6em; color: #555; font-family: 'Helvetica', sans-serif;\">เพื่อทำการลงทะเบียนเสร็จสิ้น กรุณายืนยันที่อยู่อีเมลของคุณโดยการใช้โทเค็นต่อไปนี้: </p>";
                 htmlContent += $"<p><strong><h1 style=\"font-size:7em; color: #ff5733; font-family: 'Times New Roman', serif; letter-spacing: 10px; font-weight: bold;\">{cachedToken}</h1></strong></p>";
-                htmlContent += "<p style=\"font-size: 1.2em; color: #888;\">โทเค็นนี้จะหมดอายุเมื่อ " + expirationTime.ToString(" dd MMM yyyy HH:mm tt") + " (UTC).</p>";
+                htmlContent += "<p style=\"font-size: 1.2em; color: #888;\">โทเค็นนี้จะหมดอายุเมื่อ " + expirationTime.ToString(" dd MMMM yyyy ", thaiCulture) + " (UTC).</p>";
                 htmlContent += "</div>";
                 htmlContent += "<p style=\"text-align: center; font-size: 1em; color: #888; margin-top: 30px;\">หากคุณยังไม่ได้ลงทะเบียน กรุณาไม่ตอบกลับอีเมลนี้.</p>";
 

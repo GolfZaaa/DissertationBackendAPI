@@ -199,7 +199,8 @@ namespace BackendAPI.Controllers
 
             if (userCart == null)
             {
-                return HandleResult(Result<string>.Failure("Cart not found for this user"));
+                //return HandleResult(Result<string>.Failure("Cart not found for this user"));
+                return HandleResult(Result<object>.Success(new List<object>()));
             }
 
             // userCart ตอนนี้จะมีข้อมูลของตะกร้าสินค้าของผู้ใช้ที่มี userId ที่ระบุ
@@ -266,7 +267,9 @@ namespace BackendAPI.Controllers
         //}
 
 
-        [HttpDelete("DeleteItemToCartByItemId")]
+        //[HttpDelete("DeleteItemToCartByItemId")]
+        [HttpPost("DeleteItemToCartByItemId")]
+
         public async Task<ActionResult> DeleteItemToCart(int ItemId)
         {
             var userCartItems = await _dataContext.CartItems.FirstOrDefaultAsync(item => item.Id == ItemId);

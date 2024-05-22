@@ -48,7 +48,8 @@ public class LocationController : BaseApiController
         return HandleResult(await _locationService.ShowLocationAsync());
     }
 
-    [HttpDelete("DeleteLocationService")]                                                                                                                                                                                                                                                                           
+    //[HttpDelete("DeleteLocationService")]                                                                                                                                                                                                                                                                    
+    [HttpPost("DeleteLocationService")]
     public async Task<ActionResult> DeleteLocation(int id)
     {
        return HandleResult(await _locationService.DeleteLocationAsync(id));
@@ -106,5 +107,28 @@ public class LocationController : BaseApiController
         }
         return Ok(location);
     }
+
+    [HttpPost("DeleteLocationImages")]
+    public async Task<ActionResult> DeleteLocationImages(int id)
+    {
+        var result = await _dataContext.LocationImages.FindAsync(id);
+        if (result == null)
+        {
+            HandleResult(Result<string>.Failure("Not Found Image"));
+        }
+        _dataContext.LocationImages.Remove(result);
+        await _dataContext.SaveChangesAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("GetLocationImages")]
+    public async Task<ActionResult> GetLocationImages()
+    {
+        var result = await _dataContext.LocationImages.ToListAsync();
+
+        return Ok(result);
+    }
+
+
 
 }

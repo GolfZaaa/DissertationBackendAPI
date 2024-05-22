@@ -41,14 +41,15 @@ namespace BackendAPI.Controllers
             return HandleResult(await _roleService.CreateRoleAsync(dto));
         }
 
-        [HttpPut("UpdateRoleService")]
+        [HttpPost("UpdateRoleService")]
         public async Task<ActionResult> Update(RoleUpdateDto dto)
         {
             return HandleResult(await _roleService.UpdateRoleAsync(dto));
         }
 
 
-        [HttpDelete("DeleteRoleService")]
+        //[HttpDelete("DeleteRoleService")]
+        [HttpPost("DeleteRoleService")]
         public async Task<IActionResult> Delete(string id)
         {
             return HandleResult (await _roleService.DeleteRoleAsync(id));

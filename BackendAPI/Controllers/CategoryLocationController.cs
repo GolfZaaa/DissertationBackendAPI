@@ -37,7 +37,8 @@ namespace BackendAPI.Controllers
             return HandleResult(await _categoryLocationService.CreateCategoryAsync(dto));
         }
 
-        [HttpDelete("DeleteCategorysService")]
+        //[HttpDelete("DeleteCategorysService")]
+        [HttpPost("DeleteCategorysService")]
         public async Task<ActionResult> DeleteCategorys(int id)
         {
             return HandleResult(await _categoryLocationService.DeleteCategorysAsync(id));
@@ -50,7 +51,7 @@ namespace BackendAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPut("UpdateCategoryService")]
+        [HttpPost("UpdateCategoryService")]
         public async Task<ActionResult> UpdateCategory([FromForm]UpdateCategoryDto dto)
         {
             var Create = new UpdateCategoryDtoValidator();
