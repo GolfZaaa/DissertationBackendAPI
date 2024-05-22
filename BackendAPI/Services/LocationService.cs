@@ -46,7 +46,6 @@ public class LocationService : ILocationService
 
         var map = _mapper.Map<Location>(dto); 
 
-        //จัดการไฟล์ในฐานข้อมูล
         if (imageNames.Count > 0)
         { 
             foreach (var image in imageNames)
